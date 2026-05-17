@@ -2,191 +2,283 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Башавтоком">
-<meta name="theme-color" content="#0A0A0C">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080809">
 <title>Башавтоком — Симулятор жизни</title>
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C8102E'/><text y='.9em' font-size='70' x='10'>🚗</text></svg>">
 <style>
 :root{
   --red:#C8102E;--red-d:#8B0C20;--red-bg:#0E0204;
-  --dark:#080809;--d2:#0F0F12;--d3:#14141A;--d4:#1C1C24;
+  --dk:#080809;--d2:#0F0F12;--d3:#14141A;--d4:#1C1C24;
   --b1:#1E1E28;--b2:#2A2A38;
-  --txt:#EAE8E0;--t2:#8888A0;--t3:#44444E;
-  --gold:#D4A84B;--gold-bg:#0E0A02;
-  --grn:#22C55E;--grn-bg:#040D06;
-  --blu:#3B82F6;--blu-bg:#030812;
-  --ora:#F97316;--ora-bg:#0A0400;
-  --pur:#A855F7;--pur-bg:#080412;
+  --tx:#EAE8E0;--t2:#8888A0;--t3:#44444E;
+  --gold:#D4A84B;--goldbg:#0E0A02;
+  --grn:#22C55E;--grnbg:#040D06;
+  --blu:#3B82F6;--blubg:#030812;
+  --ora:#F97316;--orabg:#0A0400;
+  --pur:#A855F7;--purbg:#080412;
   --dgr:#EF4444;
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bot:env(safe-area-inset-bottom,0px);
+  --top:env(safe-area-inset-top,0px);
+  --bot:env(safe-area-inset-bottom,0px);
+  --left:env(safe-area-inset-left,0px);
+  --right:env(safe-area-inset-right,0px);
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--dark);color:var(--txt)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html{height:100%;height:-webkit-fill-available}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;
+  background:var(--dk);color:var(--tx);
+  height:100%;height:-webkit-fill-available;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
 ::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:1px}
 
 /* ── SPLASH ── */
-#splash{position:fixed;inset:0;background:var(--dark);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+#splash{
+  position:fixed;inset:0;background:var(--dk);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:var(--top) var(--right) var(--bot) var(--left);
+  transition:opacity .6s ease;
+}
 #splash.hide{opacity:0;pointer-events:none}
-.splash-logo{font-size:64px;margin-bottom:1rem;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.splash-title{font-family:'Unbounded',-apple-system,sans-serif;font-size:18px;font-weight:700;letter-spacing:.05em;color:var(--txt);margin-bottom:.3rem}
-.splash-sub{font-size:13px;color:var(--t2)}
-.splash-bar{width:160px;height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:1.5rem}
-.splash-fill{height:100%;background:var(--red);border-radius:2px;animation:load 1.8s ease forwards}
-@keyframes load{from{width:0}to{width:100%}}
+.spl-ic{font-size:60px;margin-bottom:1rem;animation:ic-pulse 1.5s ease infinite}
+@keyframes ic-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.spl-t{font-size:18px;font-weight:800;letter-spacing:.05em;margin-bottom:.3rem}
+.spl-s{font-size:12px;color:var(--t2)}
+.spl-bar{width:140px;height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:1.5rem}
+.spl-fill{height:100%;background:var(--red);border-radius:2px;animation:spl-load 2s ease forwards}
+@keyframes spl-load{from{width:0}to{width:100%}}
 
 /* ── SCREENS ── */
-.scr{display:none;height:100%;overflow:hidden}
+.scr{
+  display:none;
+  height:100%;height:-webkit-fill-available;
+  overflow:hidden;
+}
 .scr.on{display:flex;flex-direction:column}
-@font-face{font-family:'Unbounded';src:local('Unbounded');font-weight:400 700}
 
-/* ── BRAND SELECT ── */
-#sb{background:var(--dark);padding:calc(var(--safe-top) + 1rem) 1rem 1rem;overflow-y:auto}
-.bh{text-align:center;margin-bottom:1.25rem}
-.gkl{font-size:9px;letter-spacing:.3em;color:var(--red);text-transform:uppercase;margin-bottom:.4rem}
-.bh h1{font-size:clamp(16px,4vw,22px);font-weight:700;line-height:1.25;margin-bottom:.25rem}
+/* ── BRAND ── */
+#sb{
+  background:var(--dk);
+  padding:calc(var(--top) + .8rem) calc(var(--right)+1rem) calc(var(--bot)+.8rem) calc(var(--left)+1rem);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.bh{text-align:center;margin-bottom:1.2rem}
+.gkl{font-size:9px;letter-spacing:.28em;color:var(--red);text-transform:uppercase;margin-bottom:.4rem}
+.bh h1{font-size:clamp(15px,4vw,22px);font-weight:800;line-height:1.25;margin-bottom:.25rem}
 .bh p{color:var(--t2);font-size:11px}
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
-.bc{background:var(--d2);border:1px solid var(--b1);border-radius:12px;padding:.85rem .75rem;text-align:center;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;-webkit-user-select:none;user-select:none}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px}
+.bc{
+  background:var(--d2);border:1px solid var(--b1);border-radius:11px;
+  padding:.8rem .7rem;text-align:center;cursor:pointer;
+  transition:transform .15s,border-color .15s,background .15s;
+  position:relative;overflow:hidden;
+}
 .bc::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--bc,var(--red));transform:scaleX(0);transition:.2s;transform-origin:left}
-.bc:active{transform:scale(.97);background:var(--d3)}
-.bc.picked{border-color:var(--bc,var(--red))}.bc.picked::after{transform:scaleX(1)}
-.bc-i{font-size:22px;margin-bottom:4px}
-.bc-n{font-size:9px;font-weight:700;letter-spacing:.08em;display:block;margin-bottom:2px}
+.bc:active{transform:scale(.96)}
+.bc.sel{border-color:var(--bc,var(--red));background:var(--d3)}.bc.sel::after{transform:scaleX(1)}
+.bc-i{font-size:20px;margin-bottom:4px}
+.bc-n{font-size:9px;font-weight:800;letter-spacing:.07em;display:block;margin-bottom:2px}
 .bc-s{font-size:10px;color:var(--t2)}
 .bc-r{font-size:9px;color:var(--t3);margin-top:1px}
+.brand-btn-wrap{
+  position:sticky;bottom:0;
+  background:linear-gradient(transparent,var(--dk) 40%);
+  padding:1.5rem 0 calc(var(--bot)+.5rem);
+}
 
 /* ── CHAR ── */
-#sc{background:var(--dark);padding:calc(var(--safe-top)+1rem) 1rem 1rem;overflow-y:auto}
-.card{background:var(--d2);border:1px solid var(--b1);border-radius:14px;padding:1.25rem}
-.card h2{font-size:15px;font-weight:700;margin-bottom:1.1rem}
+#sc{
+  background:var(--dk);
+  padding:calc(var(--top)+.8rem) calc(var(--right)+1rem) calc(var(--bot)+.8rem) calc(var(--left)+1rem);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.card{background:var(--d2);border:1px solid var(--b1);border-radius:14px;padding:1.2rem}
+.card h2{font-size:15px;font-weight:800;margin-bottom:1rem}
 .f{margin-bottom:.8rem}
 .f label{display:block;font-size:10px;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
-.f input,.f select{width:100%;background:var(--d3);border:1px solid var(--b1);border-radius:8px;color:var(--txt);font-size:14px;padding:9px 12px;outline:none;-webkit-appearance:none;appearance:none}
+.f input,.f select{
+  width:100%;background:var(--d3);border:1px solid var(--b1);border-radius:8px;
+  color:var(--tx);font-size:14px;padding:10px 12px;outline:none;
+  -webkit-appearance:none;appearance:none;
+}
 .f input:focus,.f select:focus{border-color:var(--red)}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.sp{background:var(--d3);border:1px solid var(--b1);border-radius:8px;padding:7px 10px;cursor:pointer;text-align:center;-webkit-user-select:none;user-select:none;transition:all .15s}
+.sp{
+  background:var(--d3);border:1px solid var(--b1);border-radius:8px;
+  padding:8px 10px;cursor:pointer;text-align:center;
+  transition:all .15s;-webkit-user-select:none;user-select:none;
+}
 .sp:active,.sp.sel{border-color:var(--red);background:var(--red-bg)}
 .sp-i{font-size:16px;margin-bottom:2px}
-.sp-n{font-size:11px;font-weight:600}
+.sp-n{font-size:11px;font-weight:700}
 .sp-d{font-size:9px;color:var(--t2);margin-top:1px}
 
-/* ── MAIN GAME ── */
-#sg{background:var(--dark);flex-direction:column}
-.topbar{background:var(--d2);border-bottom:1px solid var(--b1);padding:calc(var(--safe-top)+.4rem) .85rem .45rem;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-shrink:0}
+/* ── GAME SHELL ── */
+#sg{background:var(--dk);overflow:hidden}
+
+/* TOPBAR */
+.topbar{
+  background:var(--d2);border-bottom:1px solid var(--b1);
+  padding:calc(var(--top)+.4rem) calc(var(--right)+.85rem) .45rem calc(var(--left)+.85rem);
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  flex-shrink:0;
+}
 .tbl{display:flex;align-items:center;gap:8px}
-.tb-ava{width:32px;height:32px;border-radius:50%;background:var(--red-bg);border:1.5px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.tb-name{font-size:12px;font-weight:700}
-.tb-pos{font-size:10px;color:var(--t2);margin-top:1px}
-.tbr{display:flex;align-items:center;gap:6px}
-.ts{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:2px;white-space:nowrap;padding:2px 6px;background:var(--d3);border-radius:99px}
-.ts b{color:var(--txt);font-weight:700}
-.ts.g b{color:var(--grn)}.ts.w b{color:var(--ora)}.ts.r b{color:var(--dgr)}
+.ava{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--red-bg);border:1.5px solid var(--red);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+.tb-nm{font-size:12px;font-weight:800}
+.tb-ps{font-size:10px;color:var(--t2);margin-top:1px}
+.tbr{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.chip{
+  font-size:11px;color:var(--t2);
+  display:flex;align-items:center;gap:2px;
+  padding:2px 7px;background:var(--d3);border-radius:99px;
+  white-space:nowrap;
+}
+.chip b{color:var(--tx);font-weight:700}
+.chip.g b{color:var(--grn)}.chip.w b{color:var(--ora)}.chip.r b{color:var(--dgr)}
 
 /* CALENDAR BAR */
-.calbar{background:var(--d3);border-bottom:1px solid var(--b1);padding:.5rem .85rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.cal-date{font-size:13px;font-weight:700}
-.cal-dow{font-size:10px;color:var(--t2);margin-top:1px}
-.cal-right{display:flex;align-items:center;gap:8px}
-.cal-badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600}
-.cal-badge.work{background:var(--blu-bg);color:var(--blu)}
-.cal-badge.weekend{background:var(--grn-bg);color:var(--grn)}
-.cal-badge.monthend{background:var(--red-bg);color:var(--red)}
-.plan-mini{display:flex;align-items:center;gap:5px}
-.plan-mini span{font-size:10px;color:var(--t2)}
-.plan-tr{width:60px;height:5px;background:var(--dark);border-radius:3px;overflow:hidden}
+.calbar{
+  background:var(--d3);border-bottom:1px solid var(--b1);
+  padding:.45rem calc(var(--right)+.85rem) .45rem calc(var(--left)+.85rem);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.cal-d{font-size:12px;font-weight:800}
+.cal-s{font-size:10px;color:var(--t2);margin-top:1px}
+.cal-r{display:flex;align-items:center;gap:7px}
+.cbadge{font-size:9px;padding:2px 8px;border-radius:99px;font-weight:700}
+.cbadge.work{background:var(--blubg);color:var(--blu)}
+.cbadge.wknd{background:var(--grnbg);color:var(--grn)}
+.cbadge.mend{background:var(--red-bg);color:var(--red);animation:pulse-r 1.5s infinite}
+@keyframes pulse-r{0%,100%{opacity:1}50%{opacity:.5}}
+.plan-w{display:flex;align-items:center;gap:5px}
+.plan-w span{font-size:9px;color:var(--t2)}
+.plan-tr{width:55px;height:5px;background:var(--dk);border-radius:3px;overflow:hidden}
 .plan-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .5s}
 .plan-f.over{background:linear-gradient(90deg,var(--grn),var(--gold))}
-.plan-pct{font-size:10px;font-weight:700;min-width:26px}
+.plan-pct{font-size:10px;font-weight:800;min-width:26px}
 
-/* STATS BAR */
-.statsbar{padding:.5rem .85rem;display:flex;gap:6px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
-.statsbar::-webkit-scrollbar{display:none}
-.stat{background:var(--d2);border:1px solid var(--b1);border-radius:8px;padding:5px 8px;flex-shrink:0;min-width:70px}
-.stat-l{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
-.stat-bar{height:3px;background:var(--dark);border-radius:2px;overflow:hidden;margin-bottom:2px}
-.stat-fill{height:100%;border-radius:2px;transition:width .4s}
+/* STATS STRIP */
+.stats-strip{
+  display:flex;gap:5px;
+  padding:.45rem calc(var(--right)+.85rem) .45rem calc(var(--left)+.85rem);
+  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.stats-strip::-webkit-scrollbar{display:none}
+.stat{background:var(--d2);border:1px solid var(--b1);border-radius:8px;padding:4px 8px;flex-shrink:0;min-width:68px}
+.stat-l{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.stat-bar{height:3px;background:var(--dk);border-radius:2px;overflow:hidden;margin-bottom:2px}
+.stat-f{height:100%;border-radius:2px;transition:width .4s,background .4s}
 .stat-v{font-size:10px;font-weight:700}
+.stat-v.danger{color:var(--dgr);animation:pulse-r 1.5s infinite}
 
-/* MAIN CONTENT */
-.game-content{flex:1;overflow-y:auto;padding:.65rem .85rem;display:flex;flex-direction:column;gap:.55rem;padding-bottom:calc(var(--safe-bot)+60px)}
+/* MAIN SCROLL AREA */
+.game-body{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+.gc{
+  padding:.6rem calc(var(--right)+.85rem) calc(var(--bot)+65px) calc(var(--left)+.85rem);
+  display:flex;flex-direction:column;gap:.5rem;
+}
 
-/* TIME OF DAY */
-.tod{display:flex;align-items:center;gap:6px;margin-bottom:.1rem}
+/* TIME OF DAY HEADER */
+.tod-row{display:flex;align-items:center;gap:6px}
 .tod-ic{font-size:14px}
-.tod-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t2)}
-.tod-stress{font-size:10px;padding:1px 7px;border-radius:99px}
+.tod-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--t2)}
+.stress-pill{
+  font-size:9px;padding:1px 7px;border-radius:99px;
+  background:var(--orabg);color:var(--ora);border:1px solid #F9731618;
+  margin-left:auto;
+}
 
 /* EVENT CARD */
 .ecard{background:var(--d2);border:1px solid var(--b1);border-radius:12px;padding:.9rem;position:relative;overflow:hidden}
 .ecard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ea,var(--red)),transparent)}
 .emeta{display:flex;align-items:center;gap:5px;margin-bottom:7px;flex-wrap:wrap}
-.etag{font-size:9px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:3px}
-.etxt{font-size:14px;line-height:1.7;color:var(--txt)}
-.enpc{display:flex;gap:7px;margin:7px 0;padding:7px 9px;background:var(--d3);border-radius:8px;border-left:3px solid var(--nc,var(--red))}
+.etag{font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:3px}
+.edi{font-size:10px;color:var(--t3)}
+.etxt{font-size:14px;line-height:1.75;color:var(--tx)}
+.enpc{
+  display:flex;gap:7px;margin:7px 0;padding:7px 9px;
+  background:var(--d3);border-radius:8px;border-left:3px solid var(--nc,var(--red));
+}
 .enpc-av{width:26px;height:26px;border-radius:50%;background:var(--d4);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
-.enpc-nm{font-size:9px;font-weight:700;color:var(--nc,var(--red));letter-spacing:.05em;margin-bottom:1px}
+.enpc-nm{font-size:9px;font-weight:800;color:var(--nc,var(--red));letter-spacing:.05em;margin-bottom:1px}
 .enpc-tx{font-size:12px;line-height:1.5;color:var(--t2)}
-/* stress warning in card */
-.stress-warn{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ora);background:var(--ora-bg);border:1px solid #F9731618;border-radius:5px;padding:3px 8px;margin-bottom:7px}
+.stress-warn{
+  display:flex;align-items:center;gap:4px;font-size:11px;
+  color:var(--ora);background:var(--orabg);border:1px solid #F9731618;
+  border-radius:5px;padding:3px 8px;margin-bottom:7px;
+}
+
+/* CALCULATOR v2 */
+.calc{background:var(--d3);border:1px solid var(--b1);border-radius:10px;padding:.8rem .9rem;margin:7px 0}
+.calch{font-size:10px;color:var(--gold);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.calc-info{font-size:11px;color:var(--t2);background:var(--goldbg);border:1px solid #D4A84B18;border-radius:5px;padding:5px 8px;margin-bottom:8px;line-height:1.5}
+.calc-info b{color:var(--gold)}
+.cr{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.cr label{font-size:11px;color:var(--t2);flex:1;white-space:nowrap;min-width:70px}
+.cr input[type=range]{flex:2;accent-color:var(--red);height:3px;cursor:pointer;min-width:0}
+.crv{font-size:11px;font-weight:700;min-width:80px;text-align:right}
+.calc-results{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:7px}
+.calc-results.four{grid-template-columns:repeat(2,1fr)}
+.cri{background:var(--d2);border-radius:7px;padding:6px 8px;text-align:center}
+.cril{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+.criv{font-size:12px;font-weight:800;margin-top:1px}
+.calc-verdict{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:11px;font-weight:700;padding:8px 10px;border-radius:7px;transition:all .3s;line-height:1.4}
+.calc-verdict.good{background:var(--grnbg);color:var(--grn);border:1px solid #22C55E18}
+.calc-verdict.ok{background:var(--goldbg);color:var(--gold);border:1px solid #D4A84B18}
+.calc-verdict.bad{background:var(--red-bg);color:#F87171;border:1px solid #EF444418}
+.cv-score{margin-left:auto;font-size:14px;font-weight:900}
+.cv-detail{font-size:10px;opacity:.8;margin-top:2px}
 
 /* CHOICES */
 .choices{display:flex;flex-direction:column;gap:5px}
-.chb{background:var(--d2);border:1px solid var(--b1);border-radius:9px;padding:9px 11px;color:var(--txt);font-size:13px;text-align:left;cursor:pointer;transition:all .15s;display:flex;gap:7px;align-items:flex-start;position:relative;width:100%;-webkit-user-select:none;user-select:none}
-.chb:active{transform:scale(.98);background:var(--d3)}
+.chb{
+  background:var(--d2);border:1px solid var(--b1);border-radius:10px;
+  padding:10px 12px;color:var(--tx);font-size:13px;text-align:left;
+  cursor:pointer;transition:transform .12s,border-color .12s,background .12s;
+  display:flex;gap:8px;align-items:flex-start;position:relative;width:100%;
+  -webkit-user-select:none;user-select:none;
+}
+.chb:active{transform:scale(.975);background:var(--d3)}
 .chb:disabled{opacity:.3;cursor:default;transform:none}
 .chb.risky{border-color:#EF444428}
 .chb.risky:active{border-color:var(--dgr)}
-.chi{font-size:15px;flex-shrink:0;margin-top:1px}
-.cht{font-weight:600;line-height:1.4;font-size:13px}
+.chi{font-size:16px;flex-shrink:0;margin-top:1px}
+.cht{font-weight:700;line-height:1.4;font-size:13px}
 .chs{font-size:11px;color:var(--t2);margin-top:2px;line-height:1.4}
-.ch-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
-.ch-tag{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600}
-.ch-tag.up{background:var(--grn-bg);color:var(--grn)}
-.ch-tag.down{background:var(--red-bg);color:#F87171}
-.ch-tag.risk{background:#0E0000;color:var(--dgr)}
-.ch-tag.xp{background:var(--gold-bg);color:var(--gold)}
-
-/* CALC */
-.calc{background:var(--d3);border:1px solid var(--b1);border-radius:10px;padding:.8rem .9rem;margin:7px 0}
-.calch{font-size:10px;color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
-.calc-mechanic{font-size:11px;color:var(--t2);background:var(--gold-bg);border:1px solid #D4A84B18;border-radius:5px;padding:5px 8px;margin-bottom:8px;line-height:1.5}
-.calc-mechanic b{color:var(--gold)}
-.cr{display:flex;align-items:center;gap:6px;margin-bottom:5px}
-.cr label{font-size:11px;color:var(--t2);flex:1;white-space:nowrap}
-.cr input[type=range]{flex:2.5;accent-color:var(--red);height:3px;cursor:pointer}
-.crv{font-size:11px;font-weight:600;min-width:85px;text-align:right}
-.cres{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:7px}
-.cri{background:var(--d2);border-radius:6px;padding:5px;text-align:center}
-.cril{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.05em}
-.criv{font-size:11px;font-weight:700;color:var(--gold);margin-top:2px}
-.verdict{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:12px;font-weight:600;padding:7px 10px;border-radius:7px;transition:all .3s}
-.verdict.good{background:var(--grn-bg);color:var(--grn);border:1px solid #22C55E18}
-.verdict.warn{background:var(--gold-bg);color:var(--gold);border:1px solid #D4A84B18}
-.verdict.bad{background:var(--red-bg);color:#F87171;border:1px solid #EF444418}
-.verdict-sc{margin-left:auto;font-size:13px;font-weight:800}
-
-/* LIFE SECTION */
-.life-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.life-card{background:var(--d2);border:1px solid var(--b1);border-radius:10px;padding:.7rem .8rem}
-.life-card.owned{border-color:var(--grn)20}
-.lc-i{font-size:22px;margin-bottom:4px}
-.lc-n{font-size:12px;font-weight:600}
-.lc-s{font-size:10px;color:var(--t2);margin-top:1px}
-.lc-price{font-size:11px;color:var(--gold);margin-top:3px;font-weight:600}
-.lc-own{font-size:9px;color:var(--grn);margin-top:2px}
+.chtags{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+.chtag{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:700}
+.chtag.up{background:var(--grnbg);color:var(--grn)}
+.chtag.dn{background:var(--red-bg);color:#F87171}
+.chtag.rk{background:#0E0000;color:var(--dgr)}
+.chtag.nt{background:var(--blubg);color:var(--blu)}
 
 /* BANNER */
-.banner{padding:7px 10px;border-radius:8px;font-size:12px;font-weight:600;display:none;border:1px solid transparent;align-items:center;gap:6px;line-height:1.4;flex-shrink:0}
-.banner.ok{background:var(--grn-bg);border-color:#22C55E18;color:var(--grn);display:flex}
+.banner{
+  padding:8px 11px;border-radius:9px;font-size:12px;font-weight:700;
+  display:none;border:1px solid transparent;align-items:center;gap:6px;line-height:1.4;
+  flex-shrink:0;
+}
+.banner.ok{background:var(--grnbg);border-color:#22C55E18;color:var(--grn);display:flex}
 .banner.fail{background:var(--red-bg);border-color:#C8102E18;color:#F87171;display:flex}
-.banner.warn{background:var(--gold-bg);border-color:#D4A84B18;color:var(--gold);display:flex}
-.banner.info{background:var(--blu-bg);border-color:#3B82F618;color:var(--blu);display:flex}
+.banner.warn{background:var(--goldbg);border-color:#D4A84B18;color:var(--gold);display:flex}
+.banner.info{background:var(--blubg);border-color:#3B82F618;color:var(--blu);display:flex}
 .banner.danger{background:#0E0000;border-color:#EF444418;color:var(--dgr);display:flex}
 
 /* LOG */
@@ -196,69 +288,178 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMac
 .logt{flex-shrink:0;font-size:9px}
 
 /* BOTTOM NAV */
-.botnav{position:fixed;bottom:0;left:0;right:0;background:var(--d2);border-top:1px solid var(--b1);display:flex;padding-bottom:var(--safe-bot);z-index:100}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.45rem .3rem;cursor:pointer;-webkit-user-select:none;user-select:none;transition:opacity .15s}
-.bn-item:active{opacity:.6}
-.bn-ic{font-size:20px;margin-bottom:2px}
-.bn-lbl{font-size:9px;color:var(--t2);letter-spacing:.03em}
-.bn-item.active .bn-ic{filter:drop-shadow(0 0 4px var(--red))}
-.bn-item.active .bn-lbl{color:var(--red)}
-.bn-badge{position:absolute;top:6px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:0 4px;border-radius:99px;min-width:14px;text-align:center;display:none}
-.bn-badge.show{display:block}
+.botnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--d2);border-top:1px solid var(--b1);
+  display:flex;
+  padding-bottom:var(--bot);
+  padding-left:var(--left);
+  padding-right:var(--right);
+  z-index:100;flex-shrink:0;
+}
+.bni{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:.45rem .2rem;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+  transition:opacity .12s;
+  position:relative;
+}
+.bni:active{opacity:.5}
+.bni-ic{font-size:20px;margin-bottom:2px;transition:filter .2s}
+.bni-lbl{font-size:9px;color:var(--t2);letter-spacing:.02em}
+.bni.active .bni-ic{filter:drop-shadow(0 0 5px var(--red))}
+.bni.active .bni-lbl{color:var(--red);font-weight:700}
+.bni-badge{
+  position:absolute;top:5px;right:calc(50% - 20px);
+  background:var(--red);color:#fff;font-size:8px;font-weight:800;
+  padding:0 4px;border-radius:99px;min-width:14px;text-align:center;
+  display:none;
+}
+.bni-badge.on{display:block}
 
-/* TABS */
-.tab-content{display:none}
-.tab-content.active{display:flex;flex-direction:column;gap:.55rem}
+/* TAB CONTENT */
+.tab{display:none;flex-direction:column;gap:.5rem}
+.tab.on{display:flex}
+
+/* LIFE TAB */
+.life-section-title{font-size:12px;font-weight:800;color:var(--tx);margin-bottom:.3rem;margin-top:.2rem}
+.life-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lcard{
+  background:var(--d2);border:1px solid var(--b1);border-radius:10px;
+  padding:.7rem .8rem;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+}
+.lcard:active{transform:scale(.97)}
+.lcard.owned{border-color:var(--grn)22;background:var(--d3)}
+.lcard.owned::after{content:'✓';position:absolute;top:6px;right:8px;font-size:10px;color:var(--grn);font-weight:800}
+.lcard.locked{opacity:.4;cursor:not-allowed}
+.lc-i{font-size:22px;margin-bottom:4px}
+.lc-n{font-size:12px;font-weight:700;line-height:1.3}
+.lc-s{font-size:10px;color:var(--t2);margin-top:2px;line-height:1.3}
+.lc-p{font-size:11px;color:var(--gold);margin-top:4px;font-weight:700}
+.lc-tier{font-size:9px;color:var(--t3);margin-top:1px}
+
+/* CAREER TAB */
+.career-step{
+  display:flex;align-items:center;gap:6px;padding:4px 5px;border-radius:6px;
+  font-size:11px;color:var(--t2);margin-bottom:2px;
+  border:1px solid transparent;transition:all .2s;
+}
+.career-step.done{color:var(--grn)}
+.career-step.curr{color:var(--tx);background:var(--red-bg);border-color:#C8102E18}
+.cs-dot{width:7px;height:7px;border-radius:50%;background:var(--b2);flex-shrink:0;transition:background .2s}
+.career-step.done .cs-dot{background:var(--grn)}
+.career-step.curr .cs-dot{background:var(--red)}
+.sk-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.sk-row:last-child{margin:0}
+.sk-n{font-size:11px;color:var(--t2)}
+.sk-stars{display:flex;gap:2px}
+.sk-star{width:7px;height:7px;border-radius:50%;background:var(--d4);transition:background .3s}
+.sk-star.f{background:var(--gold)}
+.col-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.col-row:last-child{margin:0}
+.col-av{width:24px;height:24px;border-radius:50%;background:var(--d4);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.col-n{font-size:11px;font-weight:600}
+.col-r{font-size:9px;color:var(--t2)}
+.rel-bar{height:2px;background:var(--dk);border-radius:1px;overflow:hidden;margin-top:2px}
+.rel-f{height:100%;border-radius:1px;transition:width .4s}
+.km-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.km-row:last-child{margin:0}
+.kml{font-size:10px;color:var(--t2)}.kmv{font-size:10px;font-weight:700}
+.kmv.warn{color:var(--ora)}.kmv.danger{color:var(--dgr)}
 
 /* MODALS */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:800;display:none;align-items:flex-end;justify-content:center;padding:1rem}
+.mo{
+  position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:800;
+  display:none;align-items:flex-end;justify-content:center;
+  padding:var(--top) var(--right) var(--bot) var(--left);
+}
 .mo.on{display:flex}
-.mbox{background:var(--d2);border:1px solid var(--b2);border-radius:20px 20px 16px 16px;padding:1.4rem;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:slideup .3s ease}
-@keyframes slideup{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-.mbox h2{font-size:16px;font-weight:700;text-align:center;margin:.5rem 0 .4rem}
-.mbox p{color:var(--t2);font-size:13px;line-height:1.6;margin-bottom:.9rem;text-align:center}
-.perk{background:var(--d3);border:1px solid var(--b1);border-radius:7px;padding:6px 10px;font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.mbox{
+  background:var(--d2);border:1px solid var(--b2);
+  border-radius:20px 20px 14px 14px;
+  padding:1.25rem 1.25rem calc(1.25rem);
+  width:100%;max-width:500px;max-height:88vh;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  animation:slide-up .28s ease;
+}
+@keyframes slide-up{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mbox h2{font-size:15px;font-weight:800;text-align:center;margin:.5rem 0 .4rem}
+.mbox p{color:var(--t2);font-size:13px;line-height:1.6;margin-bottom:.85rem;text-align:center}
+.perk{background:var(--d3);border:1px solid var(--b1);border-radius:6px;padding:6px 10px;font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .rg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:.7rem}
 .ri{background:var(--d3);border-radius:7px;padding:7px 10px}
 .ril{font-size:9px;color:var(--t2);margin-bottom:2px}
-.riv{font-size:17px;font-weight:700}
-.rbonus{background:linear-gradient(135deg,var(--gold-bg),var(--d3));border:1px solid #D4A84B18;border-radius:7px;padding:9px 11px;text-align:center;margin-bottom:.7rem}
+.riv{font-size:17px;font-weight:800}
+.rbonus{background:linear-gradient(135deg,var(--goldbg),var(--d3));border:1px solid #D4A84B18;border-radius:8px;padding:10px 12px;text-align:center;margin-bottom:.7rem}
 .rbl{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em}
-.rbv{font-size:22px;font-weight:700;color:var(--gold)}
+.rbv{font-size:23px;font-weight:800;color:var(--gold)}
+
+/* PURCHASE CELEBRATION MODAL */
+#purchasemo .mbox{border-color:var(--gold);text-align:center}
+.purch-ic{font-size:56px;margin-bottom:.6rem;animation:celebrate .5s ease}
+@keyframes celebrate{0%{transform:scale(.5) rotate(-10deg);opacity:0}60%{transform:scale(1.1) rotate(3deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.purch-title{font-size:18px;font-weight:900;color:var(--gold);margin-bottom:.3rem}
+.purch-sub{font-size:13px;color:var(--t2);margin-bottom:1rem}
+.life-level-bar{height:6px;background:var(--dk);border-radius:3px;overflow:hidden;margin:.5rem 0}
+.life-level-f{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:3px;transition:width .8s ease}
+
+/* HEADHUNT MODAL */
+#hhmo .mbox{border-color:var(--pur)}
 
 /* ACH POPUP */
-.achpop{position:fixed;bottom:calc(var(--safe-bot)+70px);left:1rem;right:1rem;z-index:700;background:linear-gradient(135deg,var(--pur-bg),var(--d3));border:1px solid var(--pur);border-radius:12px;padding:10px 14px;animation:su .35s ease;display:none}
+.achpop{
+  position:fixed;
+  bottom:calc(var(--bot)+65px);
+  left:calc(var(--left)+.8rem);right:calc(var(--right)+.8rem);
+  z-index:700;
+  background:linear-gradient(135deg,var(--purbg),var(--d3));
+  border:1px solid var(--pur);border-radius:12px;
+  padding:9px 13px;
+  animation:slide-up .3s ease;display:none;
+}
 .achpop.on{display:block}
-@keyframes su{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
-.achpopi{display:flex;align-items:center;gap:9px}
-.achpop-ic{font-size:24px}
-.achpop-nm{font-size:12px;font-weight:700;color:var(--pur)}
-.achpop-ds{font-size:10px;color:var(--t2);margin-top:1px}
+.achpopi{display:flex;align-items:center;gap:8px}
+.ach-ic{font-size:22px}
+.ach-nm{font-size:11px;font-weight:800;color:var(--pur)}
+.ach-ds{font-size:10px;color:var(--t2);margin-top:1px}
 
-/* BUTTONS */
-.btn{font-size:13px;font-weight:700;letter-spacing:.04em;border:none;border-radius:10px;padding:12px 20px;cursor:pointer;transition:all .15s;-webkit-user-select:none;user-select:none;width:100%}
-.btn-r{background:var(--red);color:#fff}.btn-r:active{background:var(--red-d)}
-.btn-g{background:transparent;border:1px solid var(--b2);color:var(--txt)}.btn-g:active{border-color:var(--red)}
+/* BTNS */
+.btn{
+  font-size:13px;font-weight:800;letter-spacing:.03em;
+  border:none;border-radius:11px;padding:13px 20px;
+  cursor:pointer;transition:transform .12s,opacity .12s;
+  -webkit-user-select:none;user-select:none;width:100%;
+}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-r{background:var(--red);color:#fff}
+.btn-g{background:transparent;border:1px solid var(--b2);color:var(--tx)}
 .btn-d{background:#4A0A0A;color:#FCA5A5;border:none}
+.btn-pur{background:var(--pur);color:#fff}
 
-/* END SCREEN */
-#se{background:var(--dark);align-items:center;justify-content:center;text-align:center;padding:2rem 1rem calc(var(--safe-bot)+1rem);overflow-y:auto}
-.e-ic{font-size:56px;margin-bottom:.8rem;animation:bn 1s ease}
-@keyframes bn{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.e-ti{font-size:clamp(15px,4vw,23px);font-weight:700;margin-bottom:.25rem}
+/* END */
+#se{
+  background:var(--dk);
+  align-items:center;justify-content:center;text-align:center;
+  padding:calc(var(--top)+1rem) calc(var(--right)+1rem) calc(var(--bot)+1rem) calc(var(--left)+1rem);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.e-ic{font-size:56px;margin-bottom:.8rem;animation:celebrate .5s ease}
+.e-ti{font-size:clamp(15px,4vw,23px);font-weight:900;margin-bottom:.25rem}
 .e-sc{font-size:60px;font-weight:900;color:var(--gold);line-height:1}
-.e-sb{font-size:10px;color:var(--t2);margin:3px 0 1.2rem}
-.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:1.2rem;max-width:380px;width:100%}
+.e-sb{font-size:10px;color:var(--t2);margin:3px 0 1.1rem}
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:1.1rem;max-width:380px;width:100%}
 .egit{background:var(--d2);border-radius:7px;padding:8px}
 .egil{font-size:9px;color:var(--t2);margin-bottom:2px}
-.egiv{font-size:16px;font-weight:700}
-.achlist{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:1.2rem}
-.achbadge{background:var(--pur-bg);border:1px solid #A855F720;border-radius:7px;padding:3px 8px;font-size:10px;color:var(--pur);display:flex;align-items:center;gap:3px}
+.egiv{font-size:16px;font-weight:800}
+.achlist{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:1.1rem}
+.achbadge{background:var(--purbg);border:1px solid #A855F720;border-radius:7px;padding:3px 8px;font-size:10px;color:var(--pur);display:flex;align-items:center;gap:3px}
 
-@media(min-width:600px){
-  .bgrid{grid-template-columns:repeat(4,1fr)}
+@media(min-width:480px){
+  .bgrid{grid-template-columns:repeat(3,1fr)}
   .life-grid{grid-template-columns:repeat(3,1fr)}
-  #sg .game-content{max-width:540px;margin:0 auto;width:100%}
+  .gc{max-width:520px;margin:0 auto;width:100%}
+  .topbar,.calbar,.stats-strip{max-width:520px;margin-left:auto;margin-right:auto}
+  .botnav{max-width:520px;left:50%;transform:translateX(-50%)}
 }
 </style>
 </head>
@@ -266,94 +467,92 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMac
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-logo">🚗</div>
-  <div class="splash-title">БАШАВТОКОМ</div>
-  <div class="splash-sub">Симулятор жизни менеджера</div>
-  <div class="splash-bar"><div class="splash-fill"></div></div>
+  <div class="spl-ic">🚗</div>
+  <div class="spl-t">БАШАВТОКОМ</div>
+  <div class="spl-s">Симулятор жизни менеджера</div>
+  <div class="spl-bar"><div class="spl-fill"></div></div>
 </div>
 
 <!-- ACH POPUP -->
 <div class="achpop" id="achpop">
   <div class="achpopi">
-    <div class="achpop-ic" id="apic">🏆</div>
-    <div><div class="achpop-nm" id="apnm">Достижение!</div><div class="achpop-ds" id="apds">—</div></div>
+    <div class="ach-ic" id="apic">🏆</div>
+    <div><div class="ach-nm" id="apnm">Достижение!</div><div class="ach-ds" id="apds">—</div></div>
   </div>
 </div>
 
-<!-- ── BRAND ── -->
+<!-- ══ BRAND ══ -->
 <div id="sb" class="scr">
   <div class="bh">
     <div class="gkl">ГК Башавтоком · Уфа</div>
     <h1>Выберите дилерский центр</h1>
-    <p>15 брендов · реальный риск · симулятор жизни</p>
+    <p>15 брендов · риск · карьера · жизнь</p>
   </div>
   <div class="bgrid" id="bgrid"></div>
-  <div style="padding:1rem 0;display:flex;gap:8px;position:sticky;bottom:0;background:var(--dark)">
-    <button class="btn btn-r" id="btn-brand" onclick="brandConfirm()" disabled>Продолжить →</button>
+  <div class="brand-btn-wrap">
+    <button class="btn btn-r" id="btn-brand" onclick="brandOk()" disabled>Выбрать бренд →</button>
   </div>
 </div>
 
-<!-- ── CHAR ── -->
+<!-- ══ CHAR ══ -->
 <div id="sc" class="scr">
-  <div style="padding-bottom:1rem">
-    <div class="gkl" style="margin-bottom:.4rem">Персонаж</div>
-    <h2 style="font-size:17px;font-weight:700;margin-bottom:.1rem">Кем вы будете?</h2>
-    <p style="font-size:11px;color:var(--t2)">Выборы влияют на старт карьеры</p>
+  <div style="padding-bottom:.8rem">
+    <div class="gkl" style="margin-bottom:.3rem">Персонаж</div>
+    <h2 style="font-size:17px;font-weight:900;margin-bottom:.1rem">Кем вы будете?</h2>
+    <p style="font-size:11px;color:var(--t2)">Всё начинается с первого выбора</p>
   </div>
   <div class="card">
-    <div id="bbadge" style="display:flex;align-items:center;gap:7px;background:var(--d3);border:1px solid var(--b1);border-radius:7px;padding:6px 10px;margin-bottom:1rem;font-size:12px;font-weight:600"></div>
-    <div class="f"><label>Имя</label><input id="cname" type="text" placeholder="Артём Иванов" maxlength="20"></div>
+    <div id="bbadge" style="display:flex;align-items:center;gap:7px;background:var(--d3);border:1px solid var(--b1);border-radius:7px;padding:7px 10px;margin-bottom:1rem;font-size:12px;font-weight:700"></div>
+    <div class="f"><label>Имя</label><input id="cname" type="text" placeholder="Артём Иванов" maxlength="20" autocomplete="off"></div>
     <div class="f"><label>Стартовая позиция</label>
       <select id="cexp">
-        <option value="new">Стажёр — первый день, зарплата 25к</option>
-        <option value="mid">Менеджер — опыт 1-2 года, 42к</option>
-        <option value="pro">Старший менеджер — 3+ лет, 65к</option>
+        <option value="new">Стажёр — первый день, 25 000₽/мес</option>
+        <option value="mid">Менеджер — 1-2 года опыта, 42 000₽/мес</option>
+        <option value="pro">Старший — 3+ лет, 65 000₽/мес</option>
       </select>
     </div>
-    <div class="f"><label>Главный навык (начинает на ур.3)</label>
+    <div class="f"><label>Главный навык (старт на ур.3)</label>
       <div class="sg" id="spick"></div>
     </div>
     <div class="f"><label>Цель</label>
       <select id="cgoal">
         <option value="money">💰 Стать богатым</option>
         <option value="career">📈 Директор салона</option>
-        <option value="balance">⚖️ Работа и жизнь в балансе</option>
+        <option value="balance">⚖️ Баланс жизни и работы</option>
         <option value="risk">🎲 Жить на грани</option>
       </select>
     </div>
-    <div style="display:flex;gap:7px;margin-top:1.1rem">
+    <div style="display:flex;gap:7px;margin-top:1rem">
       <button class="btn btn-g" onclick="show('sb')" style="flex:1">← Назад</button>
       <button class="btn btn-r" onclick="startGame()" style="flex:2">Начать →</button>
     </div>
   </div>
 </div>
 
-<!-- ── GAME ── -->
+<!-- ══ GAME ══ -->
 <div id="sg" class="scr">
-  <!-- TOP -->
   <div class="topbar">
     <div class="tbl">
-      <div class="tb-ava" id="tb-ava">👤</div>
+      <div class="ava" id="tb-ava">👤</div>
       <div>
-        <div class="tb-name" id="tb-nm">Артём</div>
-        <div class="tb-pos" id="tb-ps">Стажёр</div>
+        <div class="tb-nm" id="tb-nm">Артём</div>
+        <div class="tb-ps" id="tb-ps">Стажёр</div>
       </div>
     </div>
     <div class="tbr">
-      <div class="ts g">💰 <b id="vm2">0</b>₽</div>
-      <div class="ts" id="sstress">🔥 <b id="vs">0</b>%</div>
+      <div class="chip g">💰 <b id="vm2">0</b>₽</div>
+      <div class="chip" id="chip-stress">🔥 <b id="vs">0</b>%</div>
     </div>
   </div>
 
-  <!-- CALENDAR -->
   <div class="calbar">
     <div>
-      <div class="cal-date" id="cal-date">Пн, 1 января 2026</div>
-      <div class="cal-dow" id="cal-sub">Начало карьеры · Месяц 1</div>
+      <div class="cal-d" id="cal-d">Пн, 1 января 2026</div>
+      <div class="cal-s" id="cal-s">Месяц 1 · начало карьеры</div>
     </div>
-    <div class="cal-right">
-      <span class="cal-badge work" id="cal-badge">РАБОЧИЙ</span>
-      <div class="plan-mini">
+    <div class="cal-r">
+      <span class="cbadge work" id="cbadge">РАБОЧИЙ</span>
+      <div class="plan-w">
         <span>план</span>
         <div class="plan-tr"><div class="plan-f" id="pf" style="width:0%"></div></div>
         <span class="plan-pct" id="ppct">0%</span>
@@ -361,155 +560,128 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMac
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="statsbar" id="statsbar">
-    <div class="stat">
-      <div class="stat-l">😊 Настрой</div>
-      <div class="stat-bar"><div class="stat-fill" id="sf-mood" style="width:100%;background:var(--grn)"></div></div>
-      <div class="stat-v" id="sv-mood">100</div>
-    </div>
-    <div class="stat">
-      <div class="stat-l">⚡ Энергия</div>
-      <div class="stat-bar"><div class="stat-fill" id="sf-energy" style="width:100%;background:var(--blu)"></div></div>
-      <div class="stat-v" id="sv-energy">100</div>
-    </div>
-    <div class="stat">
-      <div class="stat-l">🔥 Стресс</div>
-      <div class="stat-bar"><div class="stat-fill" id="sf-stress" style="width:0%;background:var(--ora)"></div></div>
-      <div class="stat-v" id="sv-stress">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-l">💀 Выгорание</div>
-      <div class="stat-bar"><div class="stat-fill" id="sf-burn" style="width:0%;background:var(--dgr)"></div></div>
-      <div class="stat-v" id="sv-burn">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-l">⭐ Репутация</div>
-      <div class="stat-bar"><div class="stat-fill" id="sf-rep" style="width:50%;background:var(--gold)"></div></div>
-      <div class="stat-v" id="sv-rep">50</div>
-    </div>
-    <div class="stat">
-      <div class="stat-l">📊 CSI</div>
-      <div class="stat-bar"><div class="stat-fill" id="sf-csi" style="width:100%;background:var(--pur)"></div></div>
-      <div class="stat-v" id="sv-csi">100</div>
-    </div>
+  <div class="stats-strip">
+    <div class="stat"><div class="stat-l">😊 Настрой</div><div class="stat-bar"><div class="stat-f" id="sf-mood" style="width:100%;background:#22C55E"></div></div><div class="stat-v" id="sv-mood">100</div></div>
+    <div class="stat"><div class="stat-l">⚡ Энергия</div><div class="stat-bar"><div class="stat-f" id="sf-nrg" style="width:100%;background:#3B82F6"></div></div><div class="stat-v" id="sv-nrg">100</div></div>
+    <div class="stat"><div class="stat-l">🔥 Стресс</div><div class="stat-bar"><div class="stat-f" id="sf-str" style="width:0%;background:#F97316"></div></div><div class="stat-v" id="sv-str">0</div></div>
+    <div class="stat"><div class="stat-l">💀 Выгорание</div><div class="stat-bar"><div class="stat-f" id="sf-brn" style="width:0%;background:#EF4444"></div></div><div class="stat-v" id="sv-brn">0</div></div>
+    <div class="stat"><div class="stat-l">⭐ Репутация</div><div class="stat-bar"><div class="stat-f" id="sf-rep" style="width:50%;background:#D4A84B"></div></div><div class="stat-v" id="sv-rep">50</div></div>
+    <div class="stat"><div class="stat-l">🎯 CSI</div><div class="stat-bar"><div class="stat-f" id="sf-csi" style="width:100%;background:#A855F7"></div></div><div class="stat-v" id="sv-csi">100</div></div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="game-content" id="game-content">
-    <div class="banner" id="banner"></div>
+  <div class="game-body">
+    <div class="gc">
+      <div class="banner" id="banner"></div>
 
-    <!-- TAB: WORK -->
-    <div class="tab-content active" id="tab-work">
-      <div class="tod">
-        <div class="tod-ic" id="tod-ic">🌅</div>
-        <div class="tod-lbl" id="tod-lbl">Утро</div>
-        <div class="tod-stress" id="tod-stress-badge" style="display:none"></div>
-      </div>
-      <div class="ecard" id="ecard">
-        <div class="emeta">
-          <span class="etag" id="etag">ЗАГРУЗКА</span>
-          <span style="font-size:10px;color:var(--t3)" id="eday-info"></span>
+      <!-- WORK TAB -->
+      <div class="tab on" id="tab-work">
+        <div class="tod-row">
+          <div class="tod-ic" id="tod-ic">🌅</div>
+          <div class="tod-lbl" id="tod-lbl">Утро</div>
+          <div class="stress-pill" id="stress-pill" style="display:none"></div>
         </div>
-        <div id="ebody"><div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--t2);font-size:13px"><span>⏳</span><span>Генерирую ситуацию...</span></div></div>
-      </div>
-      <div class="choices" id="choices"></div>
-      <div class="logw" id="logw"><div class="logi"><span class="logt">09:00</span><span>Добро пожаловать в ГК Башавтоком!</span></div></div>
-    </div>
-
-    <!-- TAB: LIFE -->
-    <div class="tab-content" id="tab-life">
-      <div style="font-size:13px;font-weight:700;margin-bottom:.3rem">🏠 Жилье и транспорт</div>
-      <div class="life-grid" id="life-housing"></div>
-      <div style="font-size:13px;font-weight:700;margin:0.5rem 0 .3rem">🎯 Образ жизни и стиль</div>
-      <div class="life-grid" id="life-lifestyle"></div>
-      <div style="font-size:13px;font-weight:700;margin:0.5rem 0 .3rem">⚡ Снятие стресса</div>
-      <div class="life-grid" id="life-relax"></div>
-      <div style="font-size:13px;font-weight:700;margin:0.5rem 0 .3rem">📈 Риск и инвестиции</div>
-      <div class="life-grid" id="life-risk"></div>
-    </div>
-
-    <!-- TAB: CAREER -->
-    <div class="tab-content" id="tab-career">
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">📊 Карьерный путь</div>
-        <div id="career-steps"></div>
-        <div style="margin-top:.7rem">
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:3px"><span>XP до повышения</span><span id="xp-info"></span></div>
-          <div style="height:4px;background:var(--dark);border-radius:2px;overflow:hidden"><div id="xpbar" style="height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:2px;width:0%;transition:width .5s"></div></div>
+        <div class="ecard" id="ecard">
+          <div class="emeta">
+            <span class="etag" id="etag">—</span>
+            <span class="edi" id="edi"></span>
+          </div>
+          <div id="ebody">
+            <div style="display:flex;align-items:center;gap:7px;padding:8px 0;color:var(--t2);font-size:13px">
+              <span style="animation:ic-pulse 1s infinite;display:inline-block">⏳</span>
+              <span>Начинаем день...</span>
+            </div>
+          </div>
+        </div>
+        <div class="choices" id="choices"></div>
+        <div class="logw" id="logw">
+          <div class="logi"><span class="logt">09:00</span><span>Добро пожаловать в ГК Башавтоком!</span></div>
         </div>
       </div>
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">🛠 Навыки</div>
-        <div id="skills-display"></div>
-      </div>
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">👥 Коллеги</div>
-        <div id="col-display"></div>
-      </div>
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">💼 Уровень жизни</div>
-        <div id="lifestyle-status"></div>
-      </div>
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">🏅 Достижения</div>
-        <div id="ach-display" style="font-size:11px;color:var(--t2)">Пока нет</div>
-      </div>
-    </div>
 
-    <!-- TAB: STATS -->
-    <div class="tab-content" id="tab-stats">
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">💰 Финансы</div>
-        <div id="fin-display"></div>
+      <!-- LIFE TAB -->
+      <div class="tab" id="tab-life">
+        <div class="life-section-title">🏠 Жильё и транспорт</div>
+        <div class="life-grid" id="life-ht"></div>
+        <div class="life-section-title" style="margin-top:.3rem">🎩 Стиль и статус</div>
+        <div class="life-grid" id="life-style"></div>
+        <div class="life-section-title" style="margin-top:.3rem">🧘 Снятие стресса</div>
+        <div class="life-grid" id="life-relax"></div>
+        <div class="life-section-title" style="margin-top:.3rem">🎲 Риск и инвестиции</div>
+        <div class="life-grid" id="life-risk"></div>
       </div>
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">📈 Результаты месяца</div>
-        <div id="month-display"></div>
+
+      <!-- CAREER TAB -->
+      <div class="tab" id="tab-career">
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">📈 Карьерный путь</div>
+          <div id="career-path"></div>
+          <div style="margin-top:.7rem">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:2px"><span>Опыт до повышения</span><span id="xp-info"></span></div>
+            <div style="height:4px;background:var(--dk);border-radius:2px;overflow:hidden"><div id="xpbar" style="height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:2px;width:0%;transition:width .5s"></div></div>
+          </div>
+        </div>
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">🛠 Навыки</div>
+          <div id="skills-d"></div>
+        </div>
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">👥 Коллеги</div>
+          <div id="cols-d"></div>
+        </div>
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">🏅 Достижения</div>
+          <div id="ach-d" style="font-size:11px;color:var(--t2)">Пока нет</div>
+        </div>
       </div>
-      <div class="ecard">
-        <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">⚠️ Риски</div>
-        <div id="risk-display"></div>
+
+      <!-- STATS TAB -->
+      <div class="tab" id="tab-stats">
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">💰 Финансы</div>
+          <div id="fin-d"></div>
+        </div>
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">📊 Месяц</div>
+          <div id="month-d"></div>
+        </div>
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">⚠️ Риски</div>
+          <div id="risk-d"></div>
+        </div>
+        <div class="ecard">
+          <div style="font-size:12px;font-weight:800;margin-bottom:.6rem">🌍 Мир</div>
+          <div id="world-d" style="font-size:12px;color:var(--t2)">События внешнего мира появятся здесь...</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
   <div class="botnav">
-    <div class="bn-item active" onclick="switchTab('work')" id="nav-work" style="position:relative">
-      <div class="bn-ic">💼</div><div class="bn-lbl">Работа</div>
-      <div class="bn-badge" id="work-badge"></div>
-    </div>
-    <div class="bn-item" onclick="switchTab('life')" id="nav-life">
-      <div class="bn-ic">🏠</div><div class="bn-lbl">Жизнь</div>
-    </div>
-    <div class="bn-item" onclick="switchTab('career')" id="nav-career">
-      <div class="bn-ic">📈</div><div class="bn-lbl">Карьера</div>
-    </div>
-    <div class="bn-item" onclick="switchTab('stats')" id="nav-stats">
-      <div class="bn-ic">📊</div><div class="bn-lbl">Статы</div>
-    </div>
+    <div class="bni active" onclick="switchTab('work')" id="nav-work"><div class="bni-ic">💼</div><div class="bni-lbl">Работа</div><div class="bni-badge" id="work-badge"></div></div>
+    <div class="bni" onclick="switchTab('life')" id="nav-life"><div class="bni-ic">🏠</div><div class="bni-lbl">Жизнь</div></div>
+    <div class="bni" onclick="switchTab('career')" id="nav-career"><div class="bni-ic">📈</div><div class="bni-lbl">Карьера</div></div>
+    <div class="bni" onclick="switchTab('stats')" id="nav-stats"><div class="bni-ic">📊</div><div class="bni-lbl">Статы</div></div>
   </div>
 </div>
 
 <!-- MODALS -->
-<div class="mo" id="lumo"><div class="mbox" style="border:1px solid var(--gold)">
-  <div style="font-size:40px;text-align:center" id="lu-ic">🎉</div>
+<div class="mo" id="lumo"><div class="mbox" style="border-color:var(--gold)">
+  <div style="font-size:44px;text-align:center;margin-bottom:.3rem" id="lu-ic">🎉</div>
   <h2 id="lu-ti">Повышение!</h2><p id="lu-tx"></p>
   <div id="lu-p" style="margin-bottom:1rem"></div>
-  <button class="btn btn-r" onclick="closeMo('lumo')">Продолжать →</button>
+  <button class="btn btn-r" onclick="closeMo('lumo')">Продолжить →</button>
 </div></div>
 
-<div class="mo" id="demomo"><div class="mbox" style="border:1px solid var(--ora)">
-  <div style="font-size:40px;text-align:center">📉</div>
+<div class="mo" id="demomo"><div class="mbox" style="border-color:var(--ora)">
+  <div style="font-size:44px;text-align:center;margin-bottom:.3rem">📉</div>
   <h2 style="color:var(--ora)" id="demo-ti">Понижение</h2><p id="demo-tx"></p>
   <button class="btn btn-d" onclick="closeMo('demomo')">Принять и бороться</button>
 </div></div>
 
-<div class="mo" id="firemo"><div class="mbox" style="border:1px solid var(--dgr)">
-  <div style="font-size:40px;text-align:center">🚪</div>
+<div class="mo" id="firemo"><div class="mbox" style="border-color:var(--dgr)">
+  <div style="font-size:44px;text-align:center;margin-bottom:.3rem">🚪</div>
   <h2 style="color:var(--dgr)">Вас уволили</h2>
-  <p id="fire-tx"></p>
+  <p id="fire-tx">Два месяца подряд план не выполнен.</p>
   <button class="btn btn-d" onclick="location.reload()">Начать заново</button>
 </div></div>
 
@@ -523,11 +695,37 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMac
   <div class="choices" id="evmo-ch" style="margin-top:.7rem"></div>
 </div></div>
 
-<div class="mo" id="burnmo"><div class="mbox" style="border:1px solid var(--dgr)">
-  <div style="font-size:40px;text-align:center">😵</div>
-  <h2 style="color:var(--dgr)">Выгорание</h2>
-  <p>Вы полностью выгорели. Нужен срочный отпуск или отдых. Без него — увольнение.</p>
+<div class="mo" id="purchasemo"><div class="mbox">
+  <div class="purch-ic" id="purch-ic">🎉</div>
+  <div class="purch-title" id="purch-title">Поздравляем!</div>
+  <div class="purch-sub" id="purch-sub">Покупка совершена</div>
+  <div class="ecard" style="margin-bottom:.8rem;text-align:left" id="purch-effects"></div>
+  <div style="margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:3px"><span>Уровень жизни</span><span id="life-lvl-txt"></span></div>
+    <div class="life-level-bar"><div class="life-level-f" id="life-lvl-f" style="width:20%"></div></div>
+  </div>
+  <button class="btn btn-r" onclick="closeMo('purchasemo')">Отлично! →</button>
+</div></div>
+
+<div class="mo" id="burnmo"><div class="mbox" style="border-color:var(--dgr)">
+  <div style="font-size:44px;text-align:center;margin-bottom:.3rem">😵</div>
+  <h2 style="color:var(--dgr)">Выгорание!</h2>
+  <p>Вы на грани. Без отдыха — ошибки, потеря клиентов, увольнение.</p>
   <div class="choices" id="burn-ch"></div>
+</div></div>
+
+<div class="mo" id="hhmo"><div class="mbox" style="border-color:var(--pur)">
+  <div style="font-size:44px;text-align:center;margin-bottom:.3rem" id="hh-ic">🤝</div>
+  <h2 id="hh-ti">Предложение</h2>
+  <p id="hh-tx">—</p>
+  <div class="choices" id="hh-ch"></div>
+</div></div>
+
+<div class="mo" id="schememo"><div class="mbox" style="border-color:var(--dgr)">
+  <div style="font-size:44px;text-align:center;margin-bottom:.3rem">🚔</div>
+  <h2 style="color:var(--dgr)" id="scheme-ti">Проверка!</h2>
+  <p id="scheme-tx">Служба безопасности начала проверку.</p>
+  <div class="choices" id="scheme-ch"></div>
 </div></div>
 
 <!-- END -->
@@ -536,113 +734,66 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMac
   <div class="e-ti" id="e-ti">Карьера завершена!</div>
   <div class="e-sc" id="e-sc">87</div>
   <div class="e-sb" id="e-sb">итоговый балл</div>
-  <p id="e-tx" style="color:var(--t2);font-size:13px;max-width:380px;line-height:1.7;margin-bottom:1.2rem"></p>
+  <p id="e-tx" style="color:var(--t2);font-size:13px;max-width:360px;line-height:1.7;margin-bottom:1.1rem"></p>
   <div class="egrid" id="egrid"></div>
   <div class="achlist" id="ach-end"></div>
-  <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:380px;width:100%">
+  <div style="display:flex;gap:7px;max-width:360px;width:100%">
     <button class="btn btn-g" onclick="location.reload()" style="flex:1">Заново</button>
     <button class="btn btn-r" onclick="show('sb')" style="flex:1">Сменить бренд</button>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  STATIC DATA
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 const BRANDS=[
-  {id:'haval',n:'HAVAL',ic:'🚙',c:'#C8102E',s:'Китайский SUV',p:[2200,3800],m:['Jolion','F7','Dargo','H9']},
-  {id:'changan',n:'CHANGAN',ic:'🚗',c:'#1A6DB5',s:'Китайский',p:[1800,3200],m:['CS55 Plus','CS75 Plus','Uni-K']},
-  {id:'omoda',n:'OMODA',ic:'🏎',c:'#E63946',s:'Новый бренд',p:[2000,3200],m:['C5','S5','C5 GT']},
-  {id:'exeed',n:'EXEED',ic:'🚙',c:'#6D28D9',s:'Премиум-Китай',p:[3000,5500],m:['TXL','LX','RX','VX']},
-  {id:'jaecoo',n:'JAECOO',ic:'🛻',c:'#059669',s:'Внедорожник',p:[2500,4000],m:['J7','J8']},
-  {id:'lada',n:'LADA',ic:'🚘',c:'#DC2626',s:'Отечественный',p:[700,1700],m:['Granta','Vesta','Largus','Niva']},
-  {id:'nissan',n:'NISSAN',ic:'🚗',c:'#C0392B',s:'Японский',p:[2400,5000],m:['X-Trail','Qashqai','Pathfinder']},
-  {id:'renault',n:'RENAULT',ic:'🚗',c:'#E8A020',s:'Французский',p:[1600,2800],m:['Duster','Arkana','Kaptur']},
-  {id:'vw',n:'VOLKSWAGEN',ic:'🚗',c:'#1D4ED8',s:'Немецкий',p:[2800,5500],m:['Polo','Tiguan','Taos']},
-  {id:'honda',n:'HONDA',ic:'🚘',c:'#B91C1C',s:'Японский',p:[2200,4500],m:['CR-V','Pilot','HR-V']},
-  {id:'livan',n:'LIVAN',ic:'🚙',c:'#7C3AED',s:'Бюджетный',p:[900,1600],m:['X3 Pro','S6 Pro']},
-  {id:'moskv',n:'МОСКВИЧ',ic:'🚗',c:'#DC2626',s:'Отечественный',p:[1500,2500],m:['3','3e','6']},
-  {id:'zeekr',n:'ZEEKR',ic:'⚡',c:'#0EA5E9',s:'Электро',p:[4000,7000],m:['001','007','X']},
-  {id:'soueast',n:'SOUEAST',ic:'🚗',c:'#8B5CF6',s:'Китайский',p:[1400,2200],m:['DX8S','T10']},
-  {id:'isuzu',n:'ISUZU',ic:'🚛',c:'#D97706',s:'Коммерческий',p:[2500,5000],m:['D-Max','MU-X']},
+  {id:'haval',n:'HAVAL',ic:'🚙',c:'#C8102E',s:'Китайский SUV',p:[2200,3800],m:['Jolion','F7','Dargo','H9'],tier:1},
+  {id:'changan',n:'CHANGAN',ic:'🚗',c:'#1A6DB5',s:'Китайский',p:[1800,3200],m:['CS55 Plus','CS75 Plus','Uni-K'],tier:1},
+  {id:'omoda',n:'OMODA',ic:'🏎',c:'#E63946',s:'Новый бренд',p:[2000,3200],m:['C5','S5','C5 GT'],tier:1},
+  {id:'exeed',n:'EXEED',ic:'🚙',c:'#6D28D9',s:'Премиум-Китай',p:[3000,5500],m:['TXL','LX','RX','VX'],tier:2},
+  {id:'jaecoo',n:'JAECOO',ic:'🛻',c:'#059669',s:'Внедорожник',p:[2500,4000],m:['J7','J8'],tier:1},
+  {id:'lada',n:'LADA',ic:'🚘',c:'#DC2626',s:'Отечественный',p:[700,1700],m:['Granta','Vesta','Largus','Niva'],tier:0},
+  {id:'nissan',n:'NISSAN',ic:'🚗',c:'#C0392B',s:'Японский',p:[2400,5000],m:['X-Trail','Qashqai','Pathfinder'],tier:2},
+  {id:'renault',n:'RENAULT',ic:'🚗',c:'#E8A020',s:'Французский',p:[1600,2800],m:['Duster','Arkana','Kaptur'],tier:1},
+  {id:'vw',n:'VOLKSWAGEN',ic:'🚗',c:'#1D4ED8',s:'Немецкий',p:[2800,5500],m:['Polo','Tiguan','Taos'],tier:2},
+  {id:'honda',n:'HONDA',ic:'🚘',c:'#B91C1C',s:'Японский',p:[2200,4500],m:['CR-V','Pilot','HR-V'],tier:2},
+  {id:'livan',n:'LIVAN',ic:'🚙',c:'#7C3AED',s:'Бюджетный',p:[900,1600],m:['X3 Pro','S6 Pro'],tier:0},
+  {id:'moskv',n:'МОСКВИЧ',ic:'🚗',c:'#DC2626',s:'Отечественный',p:[1500,2500],m:['3','3e','6'],tier:0},
+  {id:'zeekr',n:'ZEEKR',ic:'⚡',c:'#0EA5E9',s:'Электро-премиум',p:[4000,7000],m:['001','007','X'],tier:3},
+  {id:'soueast',n:'SOUEAST',ic:'🚗',c:'#8B5CF6',s:'Китайский',p:[1400,2200],m:['DX8S','T10'],tier:0},
+  {id:'isuzu',n:'ISUZU',ic:'🚛',c:'#D97706',s:'Коммерческий',p:[2500,5000],m:['D-Max','MU-X'],tier:1},
 ];
 
 const CAREER=[
-  {t:'Стажёр',      xp:0,   plan:3, disc:3, sal:25000, exp:12000,icon:'👶',
-   perks:['CRM-доступ','Наставник','Базовый скрипт продаж']},
-  {t:'Менеджер',    xp:150, plan:5, disc:5, sal:42000, exp:18000,icon:'💼',
-   perks:['Личная база клиентов','Скидки до 5%','Тест-драйв без согласования']},
-  {t:'Ст.менеджер', xp:400, plan:7, disc:7, sal:65000, exp:25000,icon:'🏅',
-   perks:['Кредитный специалист','Скидки до 7%','VIP-приоритет']},
-  {t:'РОП',         xp:800, plan:10,disc:10,sal:95000, exp:35000,icon:'🌟',
-   perks:['Команда менеджеров','Скидки до 10%','Trade-In без согласования']},
-  {t:'Директор',    xp:1500,plan:15,disc:15,sal:150000,exp:50000,icon:'👑',
-   perks:['Полное управление','Маркетинг-бюджет','Встречи с Бурановым']},
+  {t:'Стажёр',      xp:0,   plan:3, disc:3, sal:25000,exp:12000,ic:'👶',brand_tier:0},
+  {t:'Менеджер',    xp:150, plan:5, disc:5, sal:42000,exp:18000,ic:'💼',brand_tier:1,perks:['Личная база клиентов','Скидки до 5%','Тест-драйв без согласования']},
+  {t:'Ст.менеджер', xp:400, plan:7, disc:7, sal:65000,exp:25000,ic:'🏅',brand_tier:2,perks:['Кредитный специалист','Скидки до 7%','Приоритет VIP']},
+  {t:'РОП',         xp:800, plan:10,disc:10,sal:95000,exp:35000,ic:'🌟',brand_tier:2,perks:['Команда менеджеров','Скидки до 10%','Trade-In без согласования']},
+  {t:'Директор',    xp:1500,plan:15,disc:15,sal:150000,exp:50000,ic:'👑',brand_tier:3,perks:['Полное управление','Маркетинг-бюджет','Бонус от оборота']},
 ];
 
 const SKILLS=[
-  {id:'nego',n:'Переговоры',ic:'🤝',desc:'Скидки, торг, убеждение'},
-  {id:'credit',n:'Кредиты',ic:'💳',desc:'Банки, одобрение, ставки'},
-  {id:'tech',n:'Тех.знания',ic:'🔧',desc:'Характеристики, сравнение'},
-  {id:'service',n:'Сервис',ic:'⭐',desc:'Клиентоориентированность'},
-  {id:'hustle',n:'Харизма',ic:'🎭',desc:'Первый контакт, доверие'},
+  {id:'nego',n:'Переговоры',ic:'🤝'},
+  {id:'credit',n:'Кредиты',ic:'💳'},
+  {id:'tech',n:'Техника',ic:'🔧'},
+  {id:'service',n:'Сервис',ic:'⭐'},
+  {id:'hustle',n:'Харизма',ic:'🎭'},
 ];
 
 const COLS=[
-  {id:'kate',n:'Катя',em:'👩',role:'Кредитный специалист',c:'#D4537E'},
-  {id:'ruslan',n:'Руслан',em:'👨',role:'Старший менеджер',c:'#3B82F6'},
+  {id:'kate',n:'Катя',em:'👩',role:'Кредитный спец.',c:'#D4537E'},
+  {id:'ruslan',n:'Руслан',em:'👨',role:'Ст. менеджер',c:'#3B82F6'},
   {id:'lena',n:'Лена',em:'👩‍💼',role:'Менеджер',c:'#22C55E'},
 ];
 
-const NPCS_DATA={
-  buranow:{n:'Буранов С.В. (Директор ГК)',em:'👔',c:'#D4A84B'},
-  ismagilov:{n:'Исмагилов А.М. (Зам.директора)',em:'🤝',c:'#3B82F6'},
-  tagirovich:{n:'Марат Тагирович (Директор)',em:'🚗',c:'#C8102E'},
-  komarova:{n:'Комарова Е. (Маркетинг)',em:'💼',c:'#A855F7'},
-  kate:{n:'Катя (Кредитный спец.)',em:'👩',c:'#D4537E'},
-  ruslan:{n:'Руслан (Коллега)',em:'👨',c:'#3B82F6'},
-};
-
-// LIFE ITEMS
-const LIFE_ITEMS={
-  housing:[
-    {id:'room',n:'Съёмная комната',ic:'🛏',price:0,monthly:8000,desc:'Стартовые условия',xpBonus:0,moodBonus:0,stressBonus:0,tier:0},
-    {id:'flat1',n:'1-комн. квартира',ic:'🏠',price:150000,monthly:20000,desc:'Своя территория +настрой',xpBonus:0,moodBonus:10,stressBonus:-5,tier:1},
-    {id:'flat2',n:'2-комн. квартира',ic:'🏡',price:300000,monthly:35000,desc:'Комфорт и пространство',xpBonus:0,moodBonus:20,stressBonus:-10,tier:2},
-    {id:'penthouse',n:'Пентхаус',ic:'🏰',price:1000000,monthly:80000,desc:'Статус и уровень жизни',xpBonus:0,moodBonus:35,stressBonus:-20,tier:4},
-  ],
-  transport:[
-    {id:'bus',n:'Автобус / такси',ic:'🚌',price:0,monthly:3000,desc:'Стартовый вариант',stressBonus:5,moodBonus:-5,tier:0},
-    {id:'solaris',n:'Hyundai Solaris',ic:'🚗',price:80000,monthly:5000,desc:'Бюджетный вариант',stressBonus:0,moodBonus:5,tier:1},
-    {id:'camry',n:'Toyota Camry',ic:'🚙',price:250000,monthly:8000,desc:'Бизнес-класс',stressBonus:-5,moodBonus:15,repBonus:5,tier:2},
-    {id:'mercedesE',n:'Mercedes E-класс',ic:'🏎',price:600000,monthly:15000,desc:'Статус и уважение',stressBonus:-15,moodBonus:25,repBonus:15,tier:3},
-    {id:'mercedesS',n:'Mercedes S-класс',ic:'💎',price:1500000,monthly:30000,desc:'Топ. Клиенты уважают.',stressBonus:-20,moodBonus:35,repBonus:25,tier:4},
-  ],
-  lifestyle:[
-    {id:'cheapsuit',n:'Базовый костюм',ic:'👔',price:0,monthly:0,desc:'Стандарт',repBonus:0,tier:0},
-    {id:'suit',n:'Деловой костюм',ic:'🧥',price:30000,monthly:0,desc:'Деловой образ +репутация',repBonus:5,tier:1,oneTime:true},
-    {id:'watch',n:'Часы Tissot',ic:'⌚',price:60000,monthly:0,desc:'Статус в переговорах',repBonus:8,tier:2,oneTime:true},
-    {id:'iphone',n:'iPhone 15 Pro',ic:'📱',price:0,monthly:5000,desc:'В кредит — статус + долг',repBonus:5,debt:80000,tier:2},
-    {id:'watchRolex',n:'Rolex',ic:'🕰',price:500000,monthly:0,desc:'VIP-символ',repBonus:20,tier:4,oneTime:true},
-    {id:'gym',n:'Абонемент в зал',ic:'💪',price:0,monthly:4000,desc:'Каждый месяц -стресс',stressBonus:-10,moodBonus:5,tier:1},
-  ],
-  relax:[
-    {id:'coffee',n:'Кофе',ic:'☕',price:500,monthly:0,desc:'-5 стресс сейчас',stressNow:-5,moodNow:3,energy:5,oneTime:true,daily:true},
-    {id:'hookah',n:'Кальянная',ic:'💨',price:2500,monthly:0,desc:'-15 стресс, +настрой',stressNow:-15,moodNow:10,oneTime:true,weekly:true},
-    {id:'bar',n:'Бар с коллегами',ic:'🍺',price:5000,monthly:0,desc:'-20 стресс, +отношения',stressNow:-20,moodNow:15,colUp:'ruslan',oneTime:true,weekly:true},
-    {id:'massage',n:'Массаж',ic:'💆',price:4000,monthly:0,desc:'-25 стресс, +энергия',stressNow:-25,energyNow:20,oneTime:true,weekly:true},
-    {id:'vacation',n:'Отпуск на море',ic:'✈️',price:80000,monthly:0,desc:'-60 стресс, -40 выгорание',stressNow:-60,burnNow:-40,moodNow:40,skipDays:5,oneTime:true,monthly:true},
-    {id:'delivery',n:'Доставка еды',ic:'🍕',price:1000,monthly:0,desc:'-8 стресс, +настрой',stressNow:-8,moodNow:5,oneTime:true,daily:true},
-    {id:'sneakers',n:'Новые кроссовки',ic:'👟',price:15000,monthly:0,desc:'Настроение и стиль',moodNow:15,oneTime:true},
-  ],
-  risk:[
-    {id:'tradein_scheme',n:'Мутный трейд-ин',ic:'🔄',price:0,monthly:0,desc:'Быстрые деньги, риск увольнения',special:'tradein',tier:0},
-    {id:'crypto',n:'Вложить в крипту',ic:'₿',price:50000,monthly:0,desc:'Шанс х3 или потеря всего',special:'crypto',tier:0},
-    {id:'betting',n:'Ставки на спорт',ic:'🎰',price:10000,monthly:0,desc:'Риск, азарт, быстрые деньги',special:'betting',tier:0},
-    {id:'car_flip',n:'Купить/перепродать авто',ic:'🚗💵',price:200000,monthly:0,desc:'Перекуп: +30-50% или -20%',special:'flip',tier:1},
-    {id:'invest',n:'Инвестиции в акции',ic:'📈',price:100000,monthly:0,desc:'Умный риск: +15-25% в год',special:'invest',tier:2},
-    {id:'business',n:'Открыть мойку/автосервис',ic:'🔧',price:500000,monthly:0,desc:'Пассивный доход, но риск',special:'business',tier:3},
-  ],
+const NPC={
+  buranow:{n:'Буранов С.В.',em:'👔',c:'#D4A84B'},
+  ismagilov:{n:'Исмагилов А.М.',em:'🤝',c:'#3B82F6'},
+  tagirovich:{n:'Марат Тагирович',em:'🚗',c:'#C8102E'},
+  komarova:{n:'Комарова Е.',em:'💼',c:'#A855F7'},
+  kate:{n:'Катя',em:'👩',c:'#D4537E'},
+  ruslan:{n:'Руслан',em:'👨',c:'#3B82F6'},
 };
 
 const ACHIEVEMENTS=[
@@ -650,342 +801,497 @@ const ACHIEVEMENTS=[
   {id:'ten_sales',ic:'🔟',n:'Десятка',ds:'10 продаж суммарно'},
   {id:'plan_done',ic:'📊',n:'100% плана',ds:'Выполнить план за месяц'},
   {id:'plan_150',ic:'🚀',n:'Рекорд!',ds:'150%+ плана'},
-  {id:'millionaire',ic:'💰',n:'Миллион',ds:'Накопить 1 000 000₽'},
+  {id:'million',ic:'💰',n:'Миллион',ds:'Накопить 1 000 000₽'},
   {id:'promo',ic:'📈',n:'Карьерный рост',ds:'Первое повышение'},
   {id:'vip5',ic:'💎',n:'VIP-охотник',ds:'5 VIP-сделок'},
-  {id:'calc_expert',ic:'🧮',n:'Кредитный эксперт',ds:'5 точных расчётов подряд'},
+  {id:'calc_5',ic:'🧮',n:'Кредитный эксперт',ds:'5 точных расчётов подряд'},
   {id:'survived_burn',ic:'🔥',n:'Несгибаемый',ds:'Преодолеть выгорание'},
   {id:'no_debt',ic:'🏦',n:'Без долгов',ds:'Погасить все долги'},
   {id:'director',ic:'👑',n:'Директор',ds:'Достичь максимальной должности'},
-  {id:'recovery',ic:'💪',n:'Comeback',ds:'Вернуться после понижения'},
+  {id:'comeback',ic:'💪',n:'Comeback',ds:'Вернуться после понижения'},
+  {id:'brand_jump',ic:'🚗',n:'Переход',ds:'Сменить бренд по хедхантингу'},
+  {id:'clean',ic:'🕊',n:'Чистая репутация',ds:'Ни одной серой схемы'},
 ];
 
-// DAILY EVENTS POOL — varied by time of day, season, plan state
-const EVENTS_MORNING=[
-  {id:'briefing',tag:'ПЛАНЁРКА',accent:'#3B82F6',bg:'#030812',
-   gen:(G)=>{const car=CAREER[G.level];const hot=G.monthSales<car.plan*.3&&G.day>12;return{
-    txt:`Марат Тагирович открывает рабочий день. ${hot?'⚠️ ПЛАН ГОРИТ — темп критически низкий!':'На доске — план недели.'} Продажи: ${G.monthSales}/${car.plan}.`,
-    npc:hot?{k:'tagirovich',l:`${G.name}, нам нужны результаты. Буранов вчера звонил. Каждый клиент — на вес золота. Работаем!`}:{k:'tagirovich',l:`Доброе утро. Сегодня фокус на кредитные сделки — у банка акция. Катя поможет с оформлением.`},
-    choices:[
-      {ic:'📞',t:'Обзвонить тёплую базу',s:'7 звонков сейчас',tags:['+шанс продажи','+стресс','-энергия'],
-       fx:{energy:-12,stress:8,sales_chance:0.45,xp:12,log:'Прозвон базы — есть интерес'}},
-      {ic:'📋',t:'Изучить акции банков',s:'Подготовка к кредитным сделкам',tags:['+навык кредиты','-энергия'],
-       fx:{energy:-6,skill:'credit',xp:10,log:'Изучил кредитные программы дня'}},
-      {ic:'🤝',t:'Поговорить с Катей о стратегии',s:'+отношения с коллегой',tags:['+Катя','+настрой'],
-       fx:{mood:8,col:'kate',energy:-3,xp:8,log:'Договорился с Катей о совместных сделках'}},
-      {ic:'😤',t:'Поспорить с Маратом о нереальном плане',s:'Риск: -репутация +стресс коллег',tags:['⚠️ риск','+мнение коллег','-репутация'],risky:true,
-       fx:{rep:-10,stress:15,col_ruslan:8,energy:-5,xp:3,log:'Поспорил с Маратом — коллеги оценили смелость'}},
-    ]
-   };}
+// ══ MORNING SCENARIOS ══
+// 10 varied morning scenarios
+const MORNINGS=[
+  (G)=>{
+    const car=CAREER[G.level];const hot=G.monthSales<car.plan*.3&&G.day>12;
+    return{tag:'ПЛАНЁРКА',accent:'#3B82F6',bg:var_blubg(),
+      txt:`Марат Тагирович открывает утро. ${hot?'⚠️ Аврал — план горит!':'На доске цифры недели.'} Продажи: ${G.monthSales}/${car.plan}.`,
+      npc:{k:'tagirovich',l:hot?`${G.name}, это критично. Буранов вчера был крайне недоволен. Каждый звонок на счету!`:`Доброе утро. Сегодня фокус — кредитные клиенты. Катя поможет с банками.`},
+      choices:[
+        {ic:'📞',t:'Обзвонить тёплую базу',s:'7 звонков, активный старт',tags:['+шанс сделки','+стресс','-энергия'],
+         fx:{nrg:-12,stress:8,xp:12,sales_chance:{p:0.42,price_mul:1},log:'Прозвон базы — есть интерес'}},
+        {ic:'📋',t:'Изучить акции и программы',s:'+кредитный навык',tags:['+навык кредиты','-энергия'],
+         fx:{nrg:-6,skill:'credit',xp:10,log:'Изучил кредитные программы'}},
+        {ic:'🤝',t:'Договориться с Катей',s:'Совместные кредитные сделки',tags:['+Катя','+настрой'],
+         fx:{mood:8,col:'kate',nrg:-3,xp:8,log:'Стратегия с Катей на день'}},
+        {ic:'😤',t:'Поспорить с Маратом о плане',s:'⚠️ Риск: -репутация, +мнение коллег',tags:['⚠️ риск'],risky:true,
+         fx:{rep:-10,stress:15,col_ruslan:8,nrg:-5,xp:3,log:'Поспорил с Маратом — Руслан уважает'}},
+      ]}
   },
-  {id:'monday_energy',tag:'ПОНЕДЕЛЬНИК',accent:'#A855F7',bg:'#080412',
-   gen:(G)=>{return{
-    txt:`Понедельник. Офис постепенно заполняется. Руслан уже рассказывает о своей воскресной рыбалке. Катя разбирает документы. Неделя только начинается.`,
-    npc:{k:'ruslan',l:'Слушай, я в воскресенье думал — надо активнее работать с Instagram. Там реально приходят клиенты. Попробуй.'},
-    choices:[
-      {ic:'💡',t:'Создать пост в соцсетях',s:'Лид в перспективе',tags:['+навык','XP'],
-       fx:{energy:-8,skill:'hustle',xp:15,log:'Сделал пост — отметки растут'}},
-      {ic:'☕',t:'Сначала кофе и настрой на день',s:'+энергия, -стресс',tags:['+энергия','+настрой'],
-       fx:{energy:10,mood:8,stress:-5,xp:5,log:'Начал день с кофе — всё по плану'}},
-      {ic:'📊',t:'Разобрать прошлую неделю по цифрам',s:'Найти слабые места',tags:['+навык','+XP'],
-       fx:{energy:-5,rep:5,xp:15,log:'Анализ прошлой недели — нашёл точки роста'}},
-    ]
-   };}
+  (G)=>{
+    return{tag:'КЛИЕНТ НОЧЬЮ',accent:'#22C55E',bg:var_grnbg(),
+      txt:`Утром в CRM — пропущенный звонок и сообщение в WhatsApp. Клиент написал ночью: «Хочу посмотреть ${G.brand.m[rnd(0,G.brand.m.length-1)]} сегодня, реально ли?» Горячий лид.`,
+      npc:{k:'kate',l:'Видела уведомление — клиент активный, сразу отвечай! Такие ждать не любят.'},
+      choices:[
+        {ic:'📱',t:'Ответить немедленно',s:'+высокий шанс встречи',tags:['+горячий лид','+CSI'],
+         fx:{nrg:-8,csi:3,xp:15,sales_chance:{p:0.65,price_mul:1},log:'Быстрый ответ — клиент едет сегодня'}},
+        {ic:'⏰',t:'Ответить через час — сначала кофе',s:'Лид может остыть',tags:['-шанс встречи'],
+         fx:{nrg:5,mood:5,xp:5,sales_chance:{p:0.35,price_mul:1},log:'Ответил позже — клиент немного остыл'}},
+        {ic:'👐',t:'Передать Лене — у неё свободнее',s:'+отношения с Леной',tags:['+Лена'],
+         fx:{col:'lena',xp:8,log:'Передал горячий лид Лене'}},
+      ]}
+  },
+  (G)=>{
+    return{tag:'ДИРЕКТОР В САЛОНЕ',accent:'#D4A84B',bg:var_goldbg(),
+      txt:`Буранов С.В. лично приехал в дилерский центр. Все нервничают. Марат бегает с папками. Коллеги делают вид что очень заняты.`,
+      npc:{k:'buranow',l:`${G.name}, я слежу за показателями. ${G.monthSales<CAREER[G.level].plan*0.5?'Меня не устраивает темп.':'Есть прогресс. Продолжайте.'} Давайте поговорим.`},
+      choices:[
+        {ic:'💼',t:'Показать свои результаты честно',s:'+репутация у директора',tags:['+репутация ГК','+XP'],
+         fx:{rep:12,xp:20,stress:8,log:'Честный разговор с Бурановым'}},
+        {ic:'🎯',t:'Предложить идею по увеличению продаж',s:'Риск: могут не оценить',tags:['⚠️ риск','+инициатива'],risky:true,
+         fx:{rep:rnd(-5,15),xp:18,stress:10,log:'Предложил инициативу Буранову'}},
+        {ic:'🙈',t:'Постараться не попасться на глаза',s:'-стресс, но потерянная возможность',tags:['-стресс'],
+         fx:{stress:-5,xp:3,log:'Избегал встречи с директором весь день'}},
+      ]}
+  },
+  (G)=>{
+    const car=CAREER[G.level];const daysLeft=30-((G.day-1)%30);
+    return{tag:'КОНЕЦ МЕСЯЦА',accent:'#C8102E',bg:var_redbg(),
+      txt:`До конца месяца ${daysLeft} дн. Все в ажиотаже. Руслан уже закрыл ${Math.min(car.plan-1,G.monthSales+2)} машины. В зале очередь. Звонки не умолкают.`,
+      npc:{k:'ruslan',l:`Я за вчера двоих закрыл! Аврал, но кайф. Давай, не отставай — кто больше сделает?`},
+      choices:[
+        {ic:'🔥',t:'Максимальный режим — все ресурсы',s:'+много продаж, +выгорание',tags:['+продажи','⚠️ выгорание','+стресс'],
+         fx:{nrg:-20,stress:20,burnout:10,xp:25,sales_chance:{p:0.7,count:2},log:'Максимальный режим в конце месяца'}},
+        {ic:'🧘',t:'Работать спокойно — качество важнее',s:'+CSI, стабильный результат',tags:['+CSI','без выгорания'],
+         fx:{nrg:-10,stress:5,csi:5,xp:15,sales_chance:{p:0.5,count:1},log:'Спокойная работа в аврал'}},
+        {ic:'📞',t:'Обзвонить всех, кто "подумывал"',s:'+продажи от прозвона',tags:['+прозвон','+стресс'],
+         fx:{nrg:-15,stress:12,xp:18,sales_chance:{p:0.45,count:2},log:'Массовый прозвон в конце месяца'}},
+      ]}
+  },
+  (G)=>{
+    return{tag:'СРОЧНЫЙ ТРЕЙД-ИН',accent:'#F97316',bg:var_orabg(),
+      txt:`В 9:05 звонок: «У меня ${['Toyota Camry','BMW 3','Kia Sportage','Mercedes C'][rnd(0,3)]} ${rnd(2018,2022)} года, хочу поменять на ваш ${G.brand.m[0]}. Могу сегодня». Срочный трейд-ин.`,
+      npc:{k:'tagirovich',l:'Оцени Trade-In сам, я доверяю твоему навыку. Если что — звони, помогу с ценой.'},
+      choices:[
+        {ic:'🔄',t:'Принять и оценить на месте',s:'+продажа, нужны знания',tags:['+Trade-In','+навык техника'],
+         fx:{nrg:-12,skill:'tech',xp:20,sales_chance:{p:0.6,price_mul:0.97},log:'Trade-In + продажа нового авто'}},
+        {ic:'📊',t:'Оценить, но взять паузу на проверку',s:'Безопасно, но клиент может уйти',tags:['осторожно'],
+         fx:{nrg:-8,xp:12,sales_chance:{p:0.45,price_mul:0.98},log:'Тщательная проверка Trade-In'}},
+        {ic:'💰',t:'Занизить оценку — больше маржа',s:'⚠️ Риск: клиент уйдёт злым',tags:['⚠️ риск','+маржа'],risky:true,
+         fx:{nrg:-8,csi:-10,rep:-5,xp:8,log:'Занизил оценку — клиент недоволен'}},
+      ]}
+  },
+  (G)=>{
+    return{tag:'БАНК НЕ РАБОТАЕТ',accent:'#EF4444',bg:var_redbg(),
+      txt:`Катя прибегает в 9:15: «Сбер технически не работает, ВТБ тоже завис. Три встречи по кредитам сегодня — что делать?»`,
+      npc:{k:'kate',l:'Газпромбанк и Альфа пока живые. Но там ставки выше. Или переносим всех?'},
+      choices:[
+        {ic:'🔄',t:'Катя ищет альтернативные банки',s:'+шанс спасти сделки',tags:['+Катя','проблема'],
+         fx:{nrg:-10,col:'kate',xp:15,sales_chance:{p:0.45},log:'Нашли рабочие банки вместе с Катей'}},
+        {ic:'💵',t:'Перевести на наличный расчёт',s:'Меньше клиентов, но чистые сделки',tags:['наличка','сложно'],
+         fx:{nrg:-8,rep:5,xp:12,sales_chance:{p:0.3},log:'Часть клиентов перешла на наличный расчёт'}},
+        {ic:'📱',t:'Перенести встречи на завтра',s:'-сегодня, +сохраним лиды',tags:['+лиды','-сегодня'],
+         fx:{nrg:-4,xp:8,log:'Перенёс кредитных клиентов на завтра'}},
+      ]}
+  },
+  (G)=>{
+    return{tag:'ВЫХОДНОЙ',accent:'#22C55E',bg:var_grnbg(),
+      txt:`Воскресенье. Мало клиентов. Коллеги зевают. Марат разрешил работать в свободном режиме. Можно отдохнуть или поработать — выбор за вами.`,
+      npc:{k:'ruslan',l:'Давай честно — всё равно никто не придёт. Может съездим пообедать нормально?'},
+      choices:[
+        {ic:'🏠',t:'Уйти домой пораньше',s:'+энергия, +настрой',tags:['+энергия','+настрой'],
+         fx:{nrg:25,mood:20,stress:-15,xp:7,log:'Ушёл домой пораньше в выходной'}},
+        {ic:'📞',t:'Прозвонить базу — вдруг кто купит',s:'+шанс продажи, -настрой',tags:['+шанс','-настрой'],
+         fx:{nrg:-8,mood:-5,stress:8,xp:15,sales_chance:{p:0.3},log:'Работал в выходной — прозвон базы'}},
+        {ic:'🍕',t:'Обед с Русланом — расслабиться',s:'+отношения, -стресс',tags:['+Руслан','-стресс','-деньги'],
+         fx:{nrg:8,mood:15,stress:-12,money:-3500,col_ruslan:12,xp:8,log:'Обед с Русланом в выходной'}},
+      ]}
+  },
+  (G)=>{
+    return{tag:'НОВЫЙ КОНКУРЕНТ',accent:'#EF4444',bg:var_redbg(),
+      txt:`Руслан сообщает: рядом открылся новый дилер того же бренда. Демпингует на 5%. Несколько клиентов уже позвонили — сравнивают цены.`,
+      npc:{k:'ruslan',l:'Я уже проверил их соцсети — реально дёшево. Надо что-то придумать, иначе клиенты будут утекать.'},
+      choices:[
+        {ic:'🎁',t:'Усилить сервис и подарки клиентам',s:'+CSI, +лояльность',tags:['+CSI','+репутация'],
+         fx:{nrg:-10,csi:8,rep:8,xp:15,log:'Усилил сервис против конкурента'}},
+        {ic:'💬',t:'Позвонить уходящим клиентам',s:'+шанс вернуть',tags:['+лиды','сложно'],
+         fx:{nrg:-12,xp:18,sales_chance:{p:0.4},log:'Звонил клиентам уходящим к конкуренту'}},
+        {ic:'📊',t:'Предложить Марату снизить цены',s:'Риск: директор может отказать',tags:['⚠️ риск','инициатива'],risky:true,
+         fx:{rep:rnd(-5,10),nrg:-5,stress:8,xp:10,log:'Предложил снизить цены из-за конкурента'}},
+      ]}
+  },
+  (G)=>{
+    return{tag:'КОЛЛЕГА ПРОДАЛ',accent:'#A855F7',bg:var_purbg(),
+      txt:`Лена с утра сияет: «Я вчера вечером закрыла AMG! Клиент сам позвонил, искал именно её!» Руслан молчит. Вы — тоже пока без результата сегодня.`,
+      npc:{k:'ruslan',l:'Везёт ей... Хотя AMG — это не наш сегмент вообще. Слушай, может позвоним нашим старым клиентам на апгрейд?'},
+      choices:[
+        {ic:'💪',t:'Порадоваться за Лену и работать',s:'+мотивация, +командная атмосфера',tags:['+настрой','+Лена'],
+         fx:{mood:10,col:'lena',xp:10,log:'Поздравил Лену — хорошая атмосфера'}},
+        {ic:'📞',t:'Сразу позвонить своим клиентам на апгрейд',s:'+шанс сделки',tags:['+прозвон'],
+         fx:{nrg:-10,stress:5,xp:15,sales_chance:{p:0.4},log:'Прозвон на апгрейд после успеха Лены'}},
+        {ic:'😤',t:'Начать гнаться за результатом любой ценой',s:'⚠️ Риск: стресс, ошибки',tags:['⚠️ риск','+давление'],risky:true,
+         fx:{stress:18,nrg:-15,csi:-5,xp:8,sales_chance:{p:0.55},log:'Гонка за результатом — высокое давление'}},
+      ]}
+  },
+  (G)=>{
+    const car=CAREER[G.level];
+    return{tag:'АВРАЛ',accent:'#C8102E',bg:var_redbg(),
+      txt:`Понедельник. Сразу три входящих лида с сайта. Катя занята с банком. Руслан на тест-драйве. Вы один — и нужно всех принять.`,
+      npc:{k:'tagirovich',l:'Не теряй ни одного! Это горячие лиды — такое бывает раз в неделю максимум. Действуй!'},
+      choices:[
+        {ic:'⚡',t:'Принять всех троих — работать быстро',s:'+2-3 сделки, +стресс +выгорание',tags:['+продажи','⚠️ стресс'],
+         fx:{nrg:-20,stress:20,burnout:8,xp:25,sales_chance:{p:0.55,count:2},log:'Аврал — принял трёх клиентов сразу'}},
+        {ic:'🤝',t:'Двоих — себе, одного отдать Лене',s:'+отношения, -один лид',tags:['+Лена','+командная работа'],
+         fx:{nrg:-14,col:'lena',xp:18,sales_chance:{p:0.6,count:1},log:'Поделил лиды с Леной'}},
+        {ic:'📋',t:'Принять самого горячего, остальных записать',s:'Качество важнее количества',tags:['+качество','-лиды'],
+         fx:{nrg:-10,csi:5,xp:12,sales_chance:{p:0.7},log:'Выбрал самого готового клиента'}},
+      ]}
   },
 ];
+function var_blubg(){return'#030812'}function var_grnbg(){return'#040D06'}
+function var_goldbg(){return'#0E0A02'}function var_redbg(){return'#0E0204'}
+function var_orabg(){return'#0A0400'}function var_purbg(){return'#080412'}
 
+// ══ DAY EVENTS ══
 const EVENTS_DAY=[
-  {id:'client_walk',tag:'КЛИЕНТ',accent:'#22C55E',bg:'#040D06',
-   gen:(G)=>{const b=G.brand;const m=b.m[rnd(0,b.m.length-1)];const p=rnd(b.p[0]*1000,b.p[1]*1000);
-    const names=['Азат и Айгуль','Дмитрий','Наталья Петровна','Рустам','Семья Гараевых','Ильяс','Камила','Тимур'][rnd(0,7)];
-    const moods=['пришли "просто посмотреть"','ищут авто срочно','долго выбирают','чётко знают что хотят'][rnd(0,3)];
-    return{
-    txt:`В зал входит ${names} — ${moods}. Смотрят на ${m}. Базовая цена: ${fmt(p)}₽. У вас есть несколько вариантов первого контакта.`,
-    npc:null,
-    hasPrice:p,hasModel:m,
-    choices:[
-      {ic:'😊',t:'Тепло поздороваться, выяснить потребности',s:'Профессиональный первый контакт',tags:['+CSI','+навык сервис'],
-       fx:{energy:-8,csi:3,skill:'service',xp:12,sale_open:true,sale_prob:0.55,sale_price:p,log:`Контакт с ${names} — хороший старт`}},
-      {ic:'🎯',t:'Сразу предложить тест-драйв',s:'Эмоции продают',tags:['+шанс сделки','XP'],
-       fx:{energy:-10,xp:15,sale_open:true,sale_prob:0.65,sale_price:p,log:`Тест-драйв ${m} — клиент впечатлён`}},
-      {ic:'📃',t:'Дать прайс и буклет',s:'Минимум усилий',tags:['-CSI','экономия энергии'],
-       fx:{energy:-3,csi:-5,xp:3,log:'Дал буклет — клиент чувствует себя брошенным'}},
-      {ic:'🔧',t:'Детально рассказать о технике',s:'Знание продукта убеждает',tags:['+доверие','XP'],
-       fx:{energy:-12,skill:'tech',xp:12,sale_open:true,sale_prob:0.5,sale_price:p,log:`Технический брифинг ${m} — клиент заинтересован`}},
-    ]
-   };}
+  // CLIENT WALK-IN
+  (G)=>{
+    const b=G.brand;const m=b.m[rnd(0,b.m.length-1)];const p=rnd(b.p[0]*1000,b.p[1]*1000);
+    const names=['Азат и Айгуль','Дмитрий','Наталья','Рустам','Семья Гараевых','Ильяс','Камила','Тимур Мансуров'][rnd(0,7)];
+    const moods=['пришли "просто посмотреть"','ищут авто срочно','долго выбирают','чётко знают что хотят','жена запрещает тратить'][rnd(0,4)];
+    return{tag:'КЛИЕНТ',accent:'#22C55E',bg:'#040D06',price:p,model:m,
+      txt:`В зал входит ${names} — ${moods}. Смотрят на ${m}. Цена: ${fmt(p)}₽.`,npc:null,
+      choices:[
+        {ic:'😊',t:'Выявить потребности — 5 вопросов',s:'Профессиональный старт',tags:['+CSI','+навык сервис'],
+         fx:{nrg:-8,csi:3,skill:'service',xp:12,sale_open:{p:0.5,price:p,money:rnd(5000,11000)},log:`Контакт с ${names}`}},
+        {ic:'🚗',t:'Сразу предложить тест-драйв',s:'Эмоции продают',tags:['+шанс сделки'],
+         fx:{nrg:-10,xp:15,sale_open:{p:0.62,price:p,money:rnd(6000,12000)},log:`Тест-драйв ${m}`}},
+        {ic:'🔧',t:'Детальный рассказ о технике',s:'Доверие через знания',tags:['+навык техника','+доверие'],
+         fx:{nrg:-12,skill:'tech',xp:12,sale_open:{p:0.48,price:p,money:rnd(5000,11000)},log:`Технический разбор ${m}`}},
+        {ic:'📃',t:'Дать прайс и буклет',s:'Пусть сами смотрят',tags:['-CSI','экономия энергии'],
+         fx:{nrg:-3,csi:-6,xp:3,log:'Дал буклет — клиент чувствует себя брошенным'}},
+      ]}
   },
-  {id:'price_neg',tag:'ТОРГ',accent:'#C8102E',bg:'#0E0204',
-   gen:(G)=>{const b=G.brand;const m=b.m[rnd(0,b.m.length-1)];const p=rnd(b.p[0]*1000,b.p[1]*1000);const disc=CAREER[G.level].disc;
-    const client=['Айрат','Гузель','Максим','Регина'][rnd(0,3)];
-    return{
-    txt:`${client} хочет ${m} за ${fmt(p)}₽, но требует скидку. Говорит: "В другом месте дали ${rnd(3,8)}%". Ваш лимит без согласования: ${disc}%.`,
-    npc:null,hasPrice:p,hasModel:m,
-    choices:[
-      {ic:'✂️',t:`Дать ${Math.min(3,disc)}% — быстро закрыть`,s:'Гарантированная сделка, меньше маржа',tags:['+продажа','быстро'],
-       fx:{energy:-8,stress:3,xp:18,direct_sale:{price:p,mul:1-Math.min(3,disc)/100,money:rnd(6000,12000)},log:`Продажа ${m} со скидкой ${Math.min(3,disc)}%`}},
-      {ic:'🎁',t:'Полная цена + доп.оборудование',s:'Маржа сохранена + допы',tags:['+маржа','навык переговоры'],
-       fx:{energy:-12,skill:'nego',xp:25,direct_sale:{price:p,mul:1.0,money:rnd(10000,18000)},log:`Полная цена + допы — мастерская сделка`}},
-      {ic:'📞',t:`Запросить ${disc}% у Марата`,s:`Риск ${disc<7?'умеренный':'высокий'}: может отказать`,tags:['⚠️ риск','максимум'],risky:true,
-       fx:{energy:-8,stress:8,xp:14,risky_sale:{price:p,mul:1-disc/100,money:rnd(8000,16000),prob:0.55},log:`Запрос ${disc}% у директора`}},
-      {ic:'🔄',t:'Предложить Trade-In',s:'Зачесть старый авто',tags:['Trade-In','навык'],
-       fx:{energy:-10,skill:'nego',xp:20,direct_sale:{price:p,mul:0.97,money:rnd(9000,15000)},log:'Trade-In + продажа нового'}},
-    ]
-   };}
+  // PRICE NEGOTIATION
+  (G)=>{
+    const b=G.brand;const m=b.m[rnd(0,b.m.length-1)];const p=rnd(b.p[0]*1000,b.p[1]*1000);const d=CAREER[G.level].disc;
+    const cn=['Айрат','Гузель','Максим','Регина','Ринат'][rnd(0,4)];
+    return{tag:'ТОРГ',accent:'#C8102E',bg:'#0E0204',price:p,model:m,
+      txt:`${cn} хочет ${m} за ${fmt(p)}₽ и настаивает на скидке. «В другом месте дали ${rnd(4,9)}%». Лимит без согласования: ${d}%.`,npc:null,
+      choices:[
+        {ic:'✂️',t:`Дать ${Math.min(3,d)}% — быстро закрыть`,s:'Гарантия сделки, меньше маржа',tags:['+продажа','быстро'],
+         fx:{nrg:-8,stress:3,xp:18,direct_sale:{price:p,mul:1-Math.min(3,d)/100,money:rnd(6000,12000)},log:`Продажа ${m} со скидкой ${Math.min(3,d)}%`}},
+        {ic:'🎁',t:'Полная цена + доп.оборудование',s:'Маржа сохранена + подарок',tags:['+маржа','навык'],
+         fx:{nrg:-12,skill:'nego',xp:25,direct_sale:{price:p,mul:1,money:rnd(10000,18000)},log:'Полная цена + допы'}},
+        {ic:'📞',t:`Запросить ${d}% у Марата`,s:`Риск: откажет — клиент уйдёт`,tags:['⚠️ риск'],risky:true,
+         fx:{nrg:-8,stress:8,xp:14,risky_sale:{price:p,mul:1-d/100,money:rnd(8000,16000),prob:0.55},log:`Запрос ${d}% у директора`}},
+        {ic:'🔄',t:'Предложить Trade-In',s:'Зачесть старый авто',tags:['Trade-In'],
+         fx:{nrg:-10,skill:'nego',xp:20,direct_sale:{price:p,mul:0.97,money:rnd(9000,15000)},log:'Trade-In + продажа'}},
+      ]}
   },
-  {id:'credit_deal',tag:'КРЕДИТ',accent:'#A855F7',bg:'#080412',
-   hasCalc:true,
-   gen:(G)=>{const b=G.brand;const m=b.m[rnd(0,b.m.length-1)];const p=rnd(b.p[0]*1000,b.p[1]*1000);
-    const client=['Тимур и Алина','Ирек','Зилия'][rnd(0,2)];
-    return{
-    txt:`${client} хочет ${m} в кредит. Платёж не больше 28 000₽/мес. Катя рядом. Откройте калькулятор и подберите условия — от этого зависит одобрение.`,
-    npc:{k:'kate',l:'Есть программа господдержки под 8.9% — если взнос от 20% и срок до 60 мес, банк одобрит почти наверняка!'},
-    hasCalc:true,hasPrice:p,hasModel:m,
-    choices:[
-      {ic:'🏦',t:'Оформить по господдержке',s:'Низкая ставка = высший шанс',tags:['+CSI','+Катя','навык кредиты'],
-       fx:{energy:-10,csi:8,col:'kate',skill:'credit',xp:25,calc_sale:{price:p,money:rnd(8000,15000)},log:`Кредит с господдержкой — ${client} счастлив`}},
-      {ic:'📅',t:'84 месяца — мин. платёж',s:'Клиент рад цифре',tags:['быстро','+продажа'],
-       fx:{energy:-8,xp:12,calc_sale:{price:p,money:rnd(6000,11000)},log:'Кредит 84 мес — платёж устроил'}},
-      {ic:'📦',t:'Кредит + КАСКО + гарантия',s:'Максимальный пакет',tags:['+маржа','топ-сделка'],
-       fx:{energy:-15,rep:5,skill:'credit',xp:30,calc_sale:{price:p*1.08,money:rnd(14000,22000)},log:'Полный кредитный пакет — мегасделка!'}},
-      {ic:'💸',t:'Предложить ставку 25%+ «других вариантов нет»',s:'РИСК: жалоба, -CSI, -репутация',tags:['⚠️ риск'],risky:true,
-       fx:{energy:-5,csi:-18,rep:-12,stress:15,xp:2,log:'Завысил ставку — жалоба в ГК'}},
-    ]
-   };}
+  // CREDIT — with enhanced calc
+  (G)=>{
+    const b=G.brand;const m=b.m[rnd(0,b.m.length-1)];const p=rnd(b.p[0]*1000,b.p[1]*1000);
+    const cn=['Тимур и Алина','Ирек','Зилия','Роберт'][rnd(0,3)];
+    return{tag:'КРЕДИТ',accent:'#A855F7',bg:'#080412',hasCalc:true,price:p,model:m,
+      txt:`${cn} хочет ${m} в кредит. Говорит: «Платёж не больше 28 000₽». Откройте калькулятор — подберите условия. Чем точнее расчёт, тем выше шанс сделки.`,
+      npc:{k:'kate',l:'Есть господдержка 8.9% — если взнос от 20% и срок до 60 мес, банк одобрит. Менеджерская комиссия будет выше!'},
+      choices:[
+        {ic:'🏦',t:'Оформить по господдержке',s:'Лучшие условия для клиента',tags:['+CSI','+Катя','навык'],
+         fx:{nrg:-10,csi:8,col:'kate',skill:'credit',xp:25,calc_sale:{price:p,money:rnd(8000,15000)},log:`Кредит господдержка — ${cn} доволен`}},
+        {ic:'📦',t:'Кредит + КАСКО + гарантия',s:'Максимальная комиссия',tags:['+маржа','топ'],
+         fx:{nrg:-15,rep:5,skill:'credit',xp:30,calc_sale:{price:p*1.08,money:rnd(14000,22000)},log:'Полный пакет'}},
+        {ic:'💸',t:'Предложить ставку 26%+ («лучшего нет»)',s:'⚠️ Жалоба + -CSI -репутация',tags:['⚠️ критично'],risky:true,
+         fx:{nrg:-3,csi:-20,rep:-15,stress:18,xp:2,log:'Завысил ставку — жалоба в ГК'}},
+      ]}
   },
-  {id:'conflict_client',tag:'КОНФЛИКТ',accent:'#EF4444',bg:'#0A0000',
-   gen:(G)=>{const names=['Сергей','Ирина','Рустам Эдуардович'][rnd(0,2)];return{
-    txt:`${names} скандалит в зале — цена выросла на ${rnd(50,120)}к за месяц. Голос на весь зал. Другие клиенты смотрят. Стресс нарастает.`,
-    npc:null,
-    choices:[
-      {ic:'🧘',t:'Спокойно объяснить ситуацию',s:'Профессионализм + эмпатия',tags:['+репутация','+CSI','навык сервис'],
-       fx:{energy:-10,stress:8,rep:10,csi:5,skill:'service',xp:25,log:'Профессионально снял конфликт'}},
-      {ic:'🎁',t:'Предложить бонус — ТО в подарок',s:'Деньги против репутации',tags:['-деньги','+CSI'],
-       fx:{energy:-8,money:-5000,csi:7,xp:20,log:'Бонус погасил конфликт'}},
-      {ic:'👔',t:'Позвать Марата Тагировича',s:'-самостоятельность, решится',tags:['-настрой','медленно'],
-       fx:{energy:-5,mood:-8,stress:8,xp:7,log:'Директор разобрался за тебя'}},
-      {ic:'❌',t:'Ответить резко — выпроводить',s:'РИСК: жалоба Буранову, -20 CSI',tags:['⚠️ критичный риск'],risky:true,
-       fx:{energy:-3,csi:-22,rep:-15,stress:22,xp:2,log:'Грубость с клиентом — жалоба напрямую в ГК'}},
-    ]
-   };}
+  // CONFLICT
+  (G)=>{
+    const cn=['Сергей Владимирович','Ирина','Рустам Эдуардович','Айнур'][rnd(0,3)];
+    return{tag:'КОНФЛИКТ',accent:'#EF4444',bg:'#0A0000',
+      txt:`${cn} скандалит в зале — цена выросла на ${rnd(50,120)}к за три недели. Громко. Другие клиенты смотрят.`,npc:null,
+      choices:[
+        {ic:'🧘',t:'Выслушать, объяснить спокойно',s:'Профессионализм',tags:['+репутация','+CSI','навык'],
+         fx:{nrg:-10,stress:8,rep:10,csi:5,skill:'service',xp:25,log:'Профессионально снял конфликт'}},
+        {ic:'🎁',t:'Подарить ТО или сертификат',s:'-деньги, +CSI, возможна сделка',tags:['+CSI','-деньги'],
+         fx:{nrg:-8,money:-5000,csi:7,xp:20,sale_open:{p:0.45,price:G.brand.p[0]*1000,money:rnd(5000,10000)},log:'Бонус погасил конфликт'}},
+        {ic:'❌',t:'Ответить резко — выпроводить',s:'⚠️ Жалоба Буранову, -20 CSI, схема_check',tags:['⚠️ критично'],risky:true,
+         fx:{nrg:-3,csi:-22,rep:-18,stress:25,xp:2,scheme_risk:true,log:'Грубость — жалоба напрямую директору ГК'}},
+      ]}
   },
-  {id:'vip_client',tag:'VIP',accent:'#D4A84B',bg:'#0E0A02',
-   gen:(G)=>{const b=G.brand;const m=b.m[b.m.length-1];const p=b.p[1]*1100;
-    const name=['Рустам Эдуардович','Айрат Хамитов','Марсель Нуров'][rnd(0,2)];
-    return{
-    txt:`Паркуется дорогой кроссовер. Заходит ${name} — дорогой костюм, уверенный взгляд. «Хочу лучшую комплектацию ${m}. Плюс КАСКО, ОСАГО, допы. Плачу сегодня».`,
-    npc:null,hasVIP:true,
-    choices:[
-      {ic:'👑',t:'VIP-зона, кофе, персональный подход',s:'Исключительный сервис',tags:['+продажа','+CSI','+репутация'],
-       fx:{energy:-15,stress:-5,rep:15,csi:10,xp:35,vip_sale:{price:p,money:rnd(25000,45000)},log:`VIP-сделка ${m} — ${name} в восторге`}},
-      {ic:'📋',t:'Детальный расчёт всего пакета',s:'Профессионализм',tags:['+продажа','надёжно'],
-       fx:{energy:-12,rep:10,xp:25,vip_sale:{price:p*0.95,money:rnd(18000,32000)},log:'VIP-продажа через расчёт'}},
-      {ic:'🏃',t:'Обслужить быстро — занят другим',s:'РИСК: VIP уйдёт разочарованным',tags:['⚠️ риск'],risky:true,
-       fx:{energy:-3,csi:-15,rep:-10,xp:5,log:'VIP без внимания — ушёл с негативом'}},
-    ]
-   };}
-  },
-  {id:'bank_refused',tag:'ФОРС-МАЖОР',accent:'#EF4444',bg:'#0A0000',
-   gen:(G)=>{return{
-    txt:`Банк Сбер сегодня ужесточил требования — отказывает почти всем клиентам без официальной зарплаты. Три потенциальных сделки под угрозой.`,
-    npc:{k:'kate',l:'Я только что с банком — у них технические проблемы + новые требования. Попробую через ВТБ и Газпромбанк.'},
-    choices:[
-      {ic:'🔄',t:'Катя ищет альтернативный банк',s:'Помочь ей — шанс спасти сделки',tags:['+Катя','+шанс'],
-       fx:{energy:-12,col:'kate',xp:18,risky_sale:{price:G.brand.p[0]*1000,money:rnd(5000,12000),prob:0.5},log:'Искали альтернативный банк с Катей'}},
-      {ic:'💵',t:'Перевести клиентов на наличный расчёт',s:'Меньше клиентов, но чистые деньги',tags:['сложно','+надёжность'],
-       fx:{energy:-8,rep:5,xp:12,risky_sale:{price:G.brand.p[0]*1200,money:rnd(8000,15000),prob:0.35},log:'Часть клиентов согласилась на наличку'}},
-      {ic:'📱',t:'Позвонить клиентам — перенести на завтра',s:'Не потерять лиды',tags:['+сохранение','-сегодня'],
-       fx:{energy:-6,xp:8,log:'Перенёс клиентов на завтра — пообещал решение'}},
-    ]
-   };}
-  },
-  {id:'competitor_stole',tag:'КОНКУРЕНТ',accent:'#EF4444',bg:'#0A0000',
-   gen:(G)=>{const m=G.brand.m[rnd(0,G.brand.m.length-1)];return{
-    txt:`Клиент, с которым вы работали 3 дня, купил аналогичный авто у конкурента — дали скидку 10%. Три часа работы впустую. Настрой в минусе.`,
-    npc:{k:'ruslan',l:'Это рынок, бывает. Главное — не зацикливайся. Следующий клиент твой.'},
-    choices:[
-      {ic:'💪',t:'Принять, следующий клиент мой',s:'Профессиональный подход',tags:['+стрессоустойчивость'],
-       fx:{energy:-3,mood:-5,stress:5,xp:10,log:'Проиграл сделку конкуренту — взял себя в руки'}},
-      {ic:'📞',t:'Позвонить — попытаться вернуть',s:'Шанс 20%: неловко, но можно',tags:['⚠️ риск','шанс'],risky:true,
-       fx:{energy:-8,stress:10,xp:8,risky_sale:{price:G.brand.p[0]*1000,money:rnd(5000,10000),prob:0.2},log:'Попытался вернуть клиента'}},
-      {ic:'😤',t:'Выяснить у Марата — почему нет запаса по скидкам',s:'+аргументы, -отношения с начальством',tags:['-репутация','+смелость'],risky:true,
-       fx:{energy:-5,stress:12,rep:-5,xp:5,log:'Высказался Марату о политике скидок'}},
-    ]
-   };}
+  // VIP
+  (G)=>{
+    const b=G.brand;const m=b.m[b.m.length-1];const p=Math.round(b.p[1]*1100);
+    const vn=['Рустам Эдуардович','Айрат Хамитов','Марсель'][rnd(0,2)];
+    return{tag:'VIP',accent:'#D4A84B',bg:'#0E0A02',isVIP:true,
+      txt:`Паркуется дорогой кроссовер. ${vn} — дорогой костюм. «Хочу лучшую комплектацию ${m}. Добавьте КАСКО, ОСАГО, допы. Сегодня».`,npc:null,
+      choices:[
+        {ic:'👑',t:'VIP-зона, кофе, персональный подход',s:'Исключительный сервис',tags:['+продажа','+CSI','+репутация'],
+         fx:{nrg:-15,stress:-5,rep:15,csi:10,xp:35,vip_sale:{price:p,money:rnd(25000,45000)},log:`VIP-сделка ${m} — ${vn} в восторге`}},
+        {ic:'📋',t:'Детальный расчёт всего пакета',s:'Профессионализм',tags:['+продажа'],
+         fx:{nrg:-12,rep:10,xp:25,vip_sale:{price:p*0.95,money:rnd(18000,32000)},log:'VIP по детальному расчёту'}},
+        {ic:'🏃',t:'Обслужить быстро — некогда',s:'⚠️ VIP уйдёт разочарованным',tags:['⚠️ риск'],risky:true,
+         fx:{nrg:-3,csi:-15,rep:-12,xp:5,log:'VIP без внимания — негативный отзыв'}},
+      ]}
   },
 ];
 
-const EVENTS_EVENING=[
-  {id:'end_of_day',tag:'ВЕЧЕР',accent:'#404050',bg:'var(--d3)',
-   gen:(G)=>{const car=CAREER[G.level];const hot=G.monthSales<car.plan*.5;return{
-    txt:`Рабочий день заканчивается. Продажи: ${G.monthSales}/${car.plan}. Стресс: ${G.stress}%. ${G.stress>60?'Ощущение усталости.':hot?'День прошёл не так, как хотелось.':'Достойный день.'}`,
-    npc:null,
-    choices:[
-      {ic:'📊',t:'Остаться — анализ и план на завтра',s:'+системный рост, +стресс',tags:['+репутация','+стресс','-энергия'],
-       fx:{energy:-10,stress:8,rep:5,xp:14,log:'Остался на вечерний анализ'}},
-      {ic:'🏃',t:'Уйти вовремя — восстановиться',s:'+энергия на завтра',tags:['+энергия','+настрой','-стресс'],
-       fx:{energy:15,mood:12,stress:-15,xp:7,log:'Ушёл вовремя — хороший отдых'}},
-      {ic:'📞',t:'Позвонить тёплому клиенту',s:'Риск: может раздражить',tags:['⚠️ риск','шанс'],risky:true,
-       fx:{energy:-10,stress:10,xp:18,risky_sale:{price:G.brand.p[0]*1000,money:rnd(5000,12000),prob:0.45},log:'Вечерний дожим клиента'}},
-      {ic:'🍕',t:'Заказать доставку и расслабиться',s:'-стресс, -деньги',tags:['-стресс','+настрой','-деньги'],
-       fx:{energy:8,mood:10,stress:-10,money:-1500,xp:5,log:'Заказал доставку — хороший вечер'}},
-    ]
-   };}
+// ══ EVENING EVENTS ══
+const EVENTS_EVE=[
+  (G)=>{
+    const car=CAREER[G.level];
+    return{tag:'ВЕЧЕР',accent:'#404050',bg:'#14141A',
+      txt:`День заканчивается. Продажи: ${G.monthSales}/${car.plan}. Стресс: ${G.stress}%. ${G.stress>60?'Тело просит отдыха.':G.monthSales<car.plan*.5?'День прошёл не лучшим образом.':'Достойный день.'}`,npc:null,
+      choices:[
+        {ic:'📊',t:'Анализ + план на завтра',s:'+системный рост, +стресс',tags:['+репутация','+стресс'],
+         fx:{nrg:-10,stress:8,rep:5,xp:14,log:'Остался на вечерний анализ'}},
+        {ic:'🏃',t:'Уйти вовремя — восстановление',s:'+энергия завтра',tags:['+энергия','+настрой','-стресс'],
+         fx:{nrg:15,mood:12,stress:-15,xp:7,log:'Ушёл вовремя — хороший отдых'}},
+        {ic:'📞',t:'Позвонить тёплому клиенту — дожать',s:'⚠️ Риск: может раздражить',tags:['⚠️ риск','шанс'],risky:true,
+         fx:{nrg:-10,stress:10,xp:18,risky_sale:{price:G.brand.p[0]*1000,money:rnd(5000,12000),prob:0.42},log:'Вечерний дожим'}},
+        {ic:'🍕',t:'Доставка и отдых дома',s:'-стресс, -деньги, +настрой',tags:['-стресс','+настрой','-деньги'],
+         fx:{nrg:8,mood:10,stress:-10,money:-1500,xp:5,log:'Заказал доставку — хороший вечер'}},
+      ]}
   },
-  {id:'weekend_offer',tag:'ВЫХОДНОЙ',accent:'#22C55E',bg:'#040D06',
-   isWeekend:true,
-   gen:(G)=>{const car=CAREER[G.level];return{
-    txt:`Выходной. Марат пишет: «${G.name}, есть возможность выйти в субботу — клиент хочет посмотреть авто только сегодня. Заплатим двойной бонус.» У вас план ${G.monthSales}/${car.plan}.`,
-    npc:{k:'tagirovich',l:'Клиент серьёзный, сам не хочет ехать в будни. Если закроешь — бонус 15 000₽ сверху.'},
-    choices:[
-      {ic:'💼',t:'Выйти — деньги важнее выходного',s:'+продажа +15к, -настрой -энергия',tags:['+деньги','+продажа','-настрой'],
-       fx:{energy:-20,mood:-15,stress:15,xp:20,direct_sale:{price:G.brand.p[0]*1200,money:rnd(15000,22000)},log:'Работал в выходной — продал'}},
-      {ic:'🏠',t:'Отказать — выходной неприкосновенен',s:'+восстановление, -отношения с Маратом',tags:['+энергия','+настрой','-репутация'],
-       fx:{energy:30,mood:25,stress:-20,rep:-5,xp:8,log:'Отказал работать в выходной — отдохнул'}},
-      {ic:'💰',t:'Выйти, но запросить тройной бонус',s:'Риск: Марат откажет',tags:['⚠️ риск','переговоры'],risky:true,
-       fx:{energy:-20,mood:-10,stress:12,xp:15,risky_sale:{price:G.brand.p[0]*1200,money:rnd(20000,30000),prob:0.6},log:'Торговался за тройной бонус в выходной'}},
-    ]
-   };}
+  (G)=>{
+    return{tag:'ПРЕДЛОЖЕНИЕ О ПЕРЕРАБОТКЕ',accent:'#D4A84B',bg:'#0E0A02',
+      txt:`Марат пишет: «${G.name}, клиент хочет посмотреть авто сегодня в 19:00 — только так. Переработка оплачивается двойным бонусом.»`,
+      npc:{k:'tagirovich',l:'Клиент серьёзный. Готов? Бонус +15 000₽ сверху плана.'},
+      choices:[
+        {ic:'💼',t:'Выйти — деньги важнее',s:'+продажа +15к, -настрой',tags:['+деньги','+продажа','-настрой'],
+         fx:{nrg:-20,mood:-15,stress:15,xp:20,direct_sale:{price:G.brand.p[0]*1200,money:rnd(15000,22000)},log:'Переработал — продал'}},
+        {ic:'🏠',t:'Отказать — выходное время неприкосновенно',s:'+восстановление, -репутация у Марата',tags:['+энергия','+настрой','-репутация'],
+         fx:{nrg:25,mood:22,stress:-18,rep:-5,xp:8,log:'Отказал от переработки — хороший отдых'}},
+        {ic:'💰',t:'Выйти, но попросить тройной бонус',s:'Риск: Марат откажет',tags:['⚠️ риск','переговоры'],risky:true,
+         fx:{nrg:-18,mood:-10,stress:12,xp:15,risky_sale:{price:G.brand.p[0]*1200,money:rnd(22000,32000),prob:0.55},log:'Торговался за тройной бонус за переработку'}},
+      ]}
   },
-  {id:'colleagues_bar',tag:'ВЕЧЕР',accent:'#A855F7',bg:'#080412',
-   gen:(G)=>{return{
-    txt:`Руслан и Лена зовут после смены в бар — «отметить пятницу». У вас ещё незакрытый отчёт.`,
-    npc:{k:'ruslan',l:'Ладно, работа никуда не денется. Пойдём — сто лет не сидели нормально!'},
-    choices:[
-      {ic:'🍺',t:'Пойти — команда важна',s:'-стресс, +коллеги, -деньги',tags:['+команда','-стресс','-деньги'],
-       fx:{energy:5,mood:20,stress:-20,money:-4000,col:'ruslan',xp:10,log:'Бар с командой — отличный вечер'}},
-      {ic:'📝',t:'Закрыть отчёт, потом домой',s:'+репутация, -настрой',tags:['+репутация','-настрой'],
-       fx:{energy:-10,mood:-8,rep:5,xp:10,log:'Дописал отчёт — пошёл домой'}},
-      {ic:'⚡',t:'Полчаса с командой, потом домой',s:'Компромисс',tags:['баланс'],
-       fx:{energy:0,mood:10,stress:-10,money:-2000,col:'ruslan',xp:8,log:'Ненадолго зашёл с коллегами'}},
-    ]
-   };}
+  (G)=>{
+    return{tag:'КОЛЛЕГИ ЗОВУТ',accent:'#A855F7',bg:'#080412',
+      txt:`Руслан и Лена зовут после смены в бар. «Пятница — надо отметить». У вас незакрытый отчёт.`,
+      npc:{k:'ruslan',l:'Работа никуда не денется! Пойдём — давно нормально не сидели.'},
+      choices:[
+        {ic:'🍺',t:'Пойти — команда важна',s:'-стресс, +коллеги, -деньги',tags:['+команда','-стресс','-деньги'],
+         fx:{nrg:5,mood:20,stress:-20,money:-4000,col_ruslan:12,xp:10,log:'Бар с командой — отличный вечер'}},
+        {ic:'📝',t:'Закрыть отчёт, потом домой',s:'+репутация, -настрой',tags:['+репутация','-настрой'],
+         fx:{nrg:-10,mood:-8,rep:5,xp:10,log:'Дописал отчёт — пошёл домой'}},
+        {ic:'⚡',t:'Полчаса с командой — компромисс',s:'Баланс',tags:['баланс'],
+         fx:{nrg:0,mood:12,stress:-10,money:-2000,col_ruslan:8,xp:8,log:'Ненадолго с коллегами — хорошо поговорили'}},
+      ]}
   },
 ];
 
-// RANDOM LIFE EVENTS (triggered every ~5 days)
-const RANDOM_EVENTS=[
-  {id:'car_broke',ic:'🚗💥',t:'Машина сломалась',d:'Внезапный ремонт — дорого и неожиданно.',
+// ══ RANDOM LIFE EVENTS ══
+const RAND_EVENTS=[
+  {id:'car_broke',ic:'🚗💥',t:'Машина сломалась',d:'Внезапный ремонт — без предупреждения.',
    ch:[
     {ic:'🔧',t:'Починить сразу — 20 000₽',s:'Спокойно, но дорого',cost:20000,stress:-5,log:'Починил машину'},
     {ic:'💳',t:'Кредит на ремонт',s:'+20к долга',debt:20000,stress:8,log:'Кредит на ремонт'},
-    {ic:'🚌',t:'Автобус — экономно',s:'-настрой, -стресс от экономии',cost:1500,mood:-12,stress:5,log:'Езжу на автобусе'},
+    {ic:'🚌',t:'Ездить на автобусе',s:'-настрой, -стресс от экономии',cost:1500,mood:-10,stress:5,log:'Автобус — экономично'},
   ]},
-  {id:'sick',ic:'🤒',t:'Захворали',d:'Температура 38.5. Врач говорит — лучше дома.',
+  {id:'sick',ic:'🤒',t:'Захворали',d:'Температура 38.5. Врач говорит — лучше дома 2 дня.',
    ch:[
-    {ic:'🛏',t:'Остаться дома',s:'-1 день продаж, зато здоровье',cost:3500,mood:5,stress:-10,skipDay:true,log:'Болел дома'},
-    {ic:'💊',t:'Таблетки и на работу',s:'Риск: -CSI из-за ошибок',stress:20,csi:-8,mood:-12,log:'Работал больным — ошибки накапливались'},
+    {ic:'🛏',t:'Остаться дома',s:'-продажи, +здоровье',cost:3500,mood:5,stress:-10,skip:2,log:'Болел дома — выздоровел'},
+    {ic:'💊',t:'На таблетках — работать',s:'Риск ошибок из-за болезни',stress:20,csi:-8,mood:-12,log:'Работал больным — ошибки'},
   ]},
-  {id:'ref_client',ic:'🎁',t:'Сарафанное радио!',d:'Клиент из прошлого месяца привёл друга прямо сейчас.',
+  {id:'ref_client',ic:'🎁',t:'Сарафанное радио!',d:'Довольный клиент привёл друга — прямо сейчас.',
    ch:[
-    {ic:'🏃',t:'Встретить немедленно',s:'+продажа, +репутация',sales:1,money:9000,rep:12,csi:5,log:'Реф.клиент — продажа!'},
-    {ic:'📞',t:'Передать Лене',s:'Лена получит бонус, вы +отношения',col_lena:15,rep:4,log:'Передал лид Лене — она рада'},
+    {ic:'🏃',t:'Встретить немедленно',s:'+продажа +репутация',sales:1,money:9000,rep:12,csi:5,log:'Реф.клиент — сделка!'},
+    {ic:'📞',t:'Передать Лене',s:'+отношения с Леной',col_lena:15,rep:4,log:'Передал лид Лене — она рада'},
   ]},
-  {id:'audit',ic:'📋',t:'Проверка от ГК',d:'Исмагилов А.М. приехал с неожиданной проверкой документов.',
+  {id:'bad_review',ic:'⭐💥',t:'Плохой отзыв',d:'Клиент поставил 1 звезду: «Давили и врали о цене».',
    ch:[
-    {ic:'✅',t:'Всё в порядке — показать документы',s:'+репутация если чисто',rep:15,stress:10,log:'Проверка прошла успешно'},
-    {ic:'😰',t:'Есть небольшие нарушения...',s:'-репутация, штраф',rep:-15,money:-10000,stress:25,log:'Нарушения обнаружены — штраф'},
+    {ic:'💬',t:'Ответить профессионально',s:'+репутация в ответе',rep:5,csi:-8,stress:10,log:'Профессионально ответил на отзыв'},
+    {ic:'📞',t:'Позвонить клиенту разобраться',s:'Шанс исправить',csi:-5,rep:8,stress:8,log:'Позвонил клиенту — частично исправил'},
+    {ic:'😤',t:'Игнорировать',s:'-репутация падает',csi:-15,rep:-10,log:'Проигнорировал плохой отзыв'},
   ]},
-  {id:'team_conflict',ic:'😠',t:'Конфликт с коллегой',d:'Руслан обвиняет: "Ты увёл моего клиента!"',
+  {id:'team_conflict',ic:'😠',t:'Конфликт с коллегой',d:'Руслан обвиняет: «Ты увёл моего клиента!»',
    ch:[
-    {ic:'🤝',t:'Поговорить честно',s:'+отношения с Русланом',col_ruslan:12,stress:-5,rep:5,log:'Помирился с Русланом'},
-    {ic:'🙅',t:'Проигнорировать',s:'-отношения надолго',col_ruslan:-18,stress:8,log:'Игнорировал конфликт — Руслан обиделся'},
-    {ic:'👔',t:'Жаловаться Марату',s:'-отношения коллег',col_ruslan:-25,rep:-5,stress:5,log:'Пожаловался директору — атмосфера накалилась'},
+    {ic:'🤝',t:'Поговорить честно',s:'+отношения',col_ruslan:14,stress:-5,rep:5,log:'Помирился с Русланом'},
+    {ic:'🙅',t:'Проигнорировать',s:'-отношения надолго',col_ruslan:-18,stress:8,log:'Игнорировал конфликт'},
+    {ic:'👔',t:'Жаловаться Марату',s:'-отношения всей команды',col_ruslan:-25,rep:-5,stress:5,log:'Пожаловался директору'},
   ]},
-  {id:'award',ic:'🏆',t:'Менеджер квартала!',d:'Комарова объявила: вы номинированы по всей ГК.',
+  {id:'award',ic:'🏆',t:'Менеджер квартала',d:'Комарова объявила: вы номинированы на звание по всей ГК.',
    ch:[
     {ic:'🎤',t:'Выступить с речью',s:'+репутация ГК, +XP',rep:20,xp:40,stress:10,log:'Выступил на церемонии ГК'},
-    {ic:'😊',t:'Скромно принять',s:'+репутация без лишнего шума',rep:12,xp:20,log:'Принял награду — коллеги аплодировали'},
+    {ic:'😊',t:'Скромно принять',s:'+репутация',rep:12,xp:20,log:'Принял награду — аплодисменты'},
   ]},
-  {id:'bad_review',ic:'⭐💥',t:'Плохой отзыв',d:'Клиент оставил 1 звезду на Яндексе — "давили и врали о цене".',
+  // WORLD EVENTS
+  {id:'rate_up',ic:'📈💸',t:'Ставки выросли!',d:'ЦБ поднял ключевую ставку. Кредиты дороже. Клиенты начали отказываться.',world:true,
    ch:[
-    {ic:'💬',t:'Ответить профессионально',s:'+репутация в ответе',rep:5,csi:-8,stress:12,log:'Профессионально ответил на отзыв'},
-    {ic:'😤',t:'Игнорировать',s:'-репутация дальше падает',csi:-15,rep:-8,log:'Проигнорировал плохой отзыв'},
-    {ic:'📞',t:'Позвонить клиенту разобраться',s:'Шанс исправить',csi:-5,rep:8,stress:8,log:'Позвонил клиенту — частично исправил'},
+    {ic:'🔄',t:'Переориентироваться на наличку',s:'Сложнее, но без банков',stress:8,xp:12,log:'Переключились на наличный расчёт из-за ставок'},
+    {ic:'🏦',t:'Найти банки с лучшими условиями',s:'Катя поможет',col:'kate',xp:15,log:'Нашли выгодные банки вместе с Катей'},
   ]},
-  {id:'bonus_month',ic:'💰',t:'Хороший месяц!',d:'Буранов С.В. лично написал: результаты отличные, внеплановый бонус.',
+  {id:'brand_crisis',ic:'🏭📉',t:'Скандал с брендом',d:'В новостях — проблема с безопасностью модели. Продажи упадут.',world:true,
    ch:[
-    {ic:'💪',t:'Поблагодарить и работать дальше',s:'+мотивация, +настрой',mood:20,rep:10,money:15000,xp:25,log:'Внеплановый бонус от Буранова'},
+    {ic:'💬',t:'Честно объяснять клиентам ситуацию',s:'+доверие, -продажи',rep:8,stress:5,csi:5,xp:12,log:'Честно говорил о проблеме с брендом'},
+    {ic:'🙈',t:'Замалчивать и продавать как ни в чём',s:'⚠️ Риск репутации',csi:-8,stress:5,xp:8,log:'Замалчивал скандал с брендом'},
+  ]},
+  {id:'new_manager',ic:'👤',t:'Новый менеджер',d:'В команду взяли молодого — сразу агрессивно ведёт клиентов.',world:true,
+   ch:[
+    {ic:'🤝',t:'Помочь и стать наставником',s:'+репутация, +новый коллега',rep:10,xp:15,log:'Помог новому менеджеру — хорошие отношения'},
+    {ic:'🏆',t:'Конкурировать — кто лучше',s:'+мотивация, +стресс',stress:10,mood:8,xp:15,sales_chance:{p:0.5},log:'Конкурировал с новым менеджером'},
   ]},
 ];
 
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
-const G={
-  brand:null,name:'',exp:'new',goal:'money',startSkill:'nego',
-  // Time
-  day:1,month:1,year:2026,dow:1, // 1=Mon
-  dayPhase:0, // 0=morning,1=day,2=evening
-  phaseEvent:0, // index in current phase events
-  // Character
-  mood:100,energy:100,stress:0,burnout:0,rep:50,csi:100,
-  // Career
-  xp:0,level:0,
-  // Finance
-  money:0,debt:0,salary:0,
-  monthExpenses:0,
-  // Monthly stats
-  monthSales:0,monthSalesHistory:[],
-  totalSales:0,totalEarned:0,revenue:0,
-  badMonths:0,
-  // Skills
-  skills:{nego:1,credit:1,tech:1,service:1,hustle:1},
-  // Colleagues
-  cols:{kate:50,ruslan:40,lena:60},
-  // Life items owned
-  housing:'room',transport:'bus',
-  owned:[],monthly_items:[],
-  // Achievements
-  achievements:[],
-  // Tracking
-  vipDeals:0,calcStreak:0,demotions:0,
-  recentEventIds:[],
-  usedEventIds:[],
-  // Calendar
-  _date:new Date(2026,0,1),
+// ══ LIFE ITEMS ══
+const LIFE={
+  housing:[
+    {id:'room',n:'Съёмная комната',ic:'🛏',p:0,mon:8000,d:'Стартово, экономно',tier:0,fx:{mood:0,stress:0},isDefault:true},
+    {id:'flat1',n:'1-комн. квартира',ic:'🏠',p:120000,mon:20000,d:'Своя территория',tier:1,fx:{mood:12,stress:-5}},
+    {id:'flat2',n:'2-комн. квартира',ic:'🏡',p:280000,mon:32000,d:'Комфорт и пространство',tier:2,fx:{mood:22,stress:-10}},
+    {id:'penthouse',n:'Пентхаус',ic:'🏰',p:900000,mon:75000,d:'Статус и роскошь',tier:4,fx:{mood:38,stress:-22,rep:15}},
+  ],
+  transport:[
+    {id:'bus',n:'Автобус / такси',ic:'🚌',p:0,mon:3000,d:'Стартово',tier:0,fx:{mood:-5,stress:5},isDefault:true},
+    {id:'solaris',n:'Hyundai Solaris',ic:'🚗',p:75000,mon:4000,d:'Бюджетно и надёжно',tier:1,fx:{mood:5,stress:0}},
+    {id:'camry',n:'Toyota Camry',ic:'🚙',p:230000,mon:7000,d:'Бизнес-класс',tier:2,fx:{mood:15,stress:-5,rep:5}},
+    {id:'mercedesE',n:'Mercedes E-класс',ic:'🏎',p:550000,mon:14000,d:'Статус. Клиенты замечают.',tier:3,fx:{mood:28,stress:-15,rep:18}},
+    {id:'mercedesS',n:'Mercedes S-класс',ic:'💎',p:1400000,mon:28000,d:'Топ-уровень',tier:4,fx:{mood:38,stress:-22,rep:28}},
+  ],
+  style:[
+    {id:'basicsuit',n:'Базовый костюм',ic:'👔',p:0,d:'Стандарт',tier:0,fx:{},isDefault:true},
+    {id:'goodsuit',n:'Деловой костюм',ic:'🧥',p:28000,d:'+репутация в переговорах',tier:1,fx:{rep:5},oneTime:true},
+    {id:'watch',n:'Часы Tissot',ic:'⌚',p:55000,d:'Статус на встречах',tier:2,fx:{rep:8},oneTime:true},
+    {id:'iphone',n:'iPhone 15 Pro',ic:'📱',p:0,mon:5000,d:'В кредит — +80к долга',tier:2,fx:{rep:5},debt:80000},
+    {id:'rolex',n:'Часы Rolex',ic:'🕰',p:480000,d:'VIP-символ',tier:4,fx:{rep:22},oneTime:true},
+    {id:'gym',n:'Абонемент в зал',ic:'💪',p:0,mon:3500,d:'Каждый месяц -стресс',tier:1,fx:{stress:-10,mood:5,monthly:true}},
+  ],
+  relax:[
+    {id:'coffee',n:'Кофе',ic:'☕',p:500,d:'-стресс прямо сейчас',tier:0,immediate:{stress:-5,mood:3,nrg:5},daily:true},
+    {id:'hookah',n:'Кальянная',ic:'💨',p:2500,d:'-15 стресс +настрой',tier:0,immediate:{stress:-15,mood:10},weekly:true},
+    {id:'bar',n:'Бар с коллегами',ic:'🍺',p:5000,d:'-20 стресс +отношения',tier:0,immediate:{stress:-20,mood:15,col_ruslan:10},weekly:true},
+    {id:'massage',n:'Массаж',ic:'💆',p:4000,d:'-25 стресс +энергия',tier:1,immediate:{stress:-25,nrg:20},weekly:true},
+    {id:'vacation',n:'Отпуск на море',ic:'✈️',p:80000,d:'-60 стресс -40 выгорание',tier:2,immediate:{stress:-60,burnout:-40,mood:40},skip:5,monthly:true},
+    {id:'delivery',n:'Доставка еды',ic:'🍕',p:1200,d:'-8 стресс прямо сейчас',tier:0,immediate:{stress:-8,mood:6},daily:true},
+    {id:'sneakers',n:'Новые кроссовки',ic:'👟',p:14000,d:'+настрой и стиль',tier:1,immediate:{mood:18},oneTime:true},
+    {id:'tg_premium',n:'Подписки и медиа',ic:'🎵',p:0,mon:2000,d:'Музыка снижает стресс',tier:0,fx:{stress:-3,monthly:true}},
+  ],
+  risk:[
+    {id:'tradein_scheme',n:'Мутный трейд-ин',ic:'🔄',p:0,d:'Быстрые деньги, риск увольнения',tier:0,special:'ti_scheme'},
+    {id:'crypto',n:'Крипта',ic:'₿',p:50000,d:'Шанс ×2.5 или потеря всего',tier:0,special:'crypto'},
+    {id:'betting',n:'Ставки',ic:'🎰',p:10000,d:'45% выиграть ×2',tier:0,special:'bet'},
+    {id:'flip',n:'Перекуп авто',ic:'🚗💵',p:200000,d:'Купить/продать: +30-50% или -20%',tier:1,special:'flip'},
+    {id:'invest',n:'Акции',ic:'📈',p:100000,d:'+15-25% в год, умный риск',tier:2,special:'invest'},
+    {id:'moto_biz',n:'Открыть автомойку',ic:'🔧',p:500000,d:'60% шанс +30к/мес пассивно',tier:3,special:'biz'},
+  ],
 };
 
-// ════════════════════════════════════════
+// ══ HEADHUNTING ══
+const HH_OFFERS=(G)=>{
+  const tier=CAREER[G.level].brand_tier;
+  const higherBrands=BRANDS.filter(b=>b.tier>=(G.brand.tier||0)&&b.id!==G.brand.id);
+  if(!higherBrands.length)return null;
+  const target=higherBrands[rnd(0,higherBrands.length-1)];
+  const salBonus=rnd(8000,20000);
+  return{
+    ic:'🤝',
+    ti:`Предложение от ${target.n}`,
+    tx:`Менеджер по персоналу ${target.n} написал: «${G.name}, ваша репутация известна. Мы готовы предложить оклад на ${fmt(salBonus)}₽ выше + служебный ${target.ic} + план ${CAREER[G.level].plan+rnd(1,2)} авто». Бренд ${tier>=2?'премиальнее':'сложнее'},`,
+    brand:target,salBonus,
+    choices:[
+      {ic:'✈️',t:`Перейти в ${target.n}`,s:`+${fmt(salBonus)}₽/мес, новый бренд`,go:target,log:`Перешёл в ${target.n}`},
+      {ic:'🙅',t:'Остаться — стабильность важнее',s:'Текущая позиция сохранена',stay:true,rep:5,log:'Отказал хедхантерам — лоялен к салону'},
+      {ic:'💬',t:'Использовать как аргумент для повышения',s:'Риск: могут отказать',negotiate:true,log:'Попытался использовать оффер для повышения зарплаты'},
+    ]
+  };
+};
+
+// ══ SCHEME CONSEQUENCES ══
+const SCHEME_CHECKS=[
+  {ic:'🚔',ti:'Проверка службы безопасности',tx:'Клиент пожаловался. СБ ГК начала внутреннее расследование.',
+   ch:[
+    {ic:'✅',t:'Признать и объяснить — была ошибка',s:'-деньги, но сохранить место',rep:-15,money:-30000,log:'Признал ошибку — штраф'},
+    {ic:'🙅',t:'Отрицать всё — ничего не знаю',s:'50% выгорит — уволят',risky_scheme:true,log:'Отрицал нарушения'},
+  ]},
+  {ic:'📋',ti:'Клиент грозит жалобой в Роспотребнадзор',tx:'Клиент угрожает официальной жалобой за завышенную ставку.',
+   ch:[
+    {ic:'💰',t:'Компенсировать разницу клиенту',s:'-деньги, закрыть вопрос',money:-20000,csi:5,rep:-5,log:'Компенсировал клиенту — вопрос закрыт'},
+    {ic:'👔',t:'Отправить клиента к директору',s:'Марат будет недоволен',rep:-8,stress:15,log:'Марат разобрался — доволен не был'},
+  ]},
+];
+
+// ══ WORLD EVENTS — appear on stats tab ══
+const WORLD_EVENTS=[
+  'Ставки по кредитам выросли — банки ужесточают требования',
+  'Конкурирующий дилер запустил акцию «Скидка 10% на все модели»',
+  'В автосалоне выросла текучка — 2 менеджера уволились',
+  'Новый директор в соседнем дилере — переманивают клиентов',
+  'Завод приостановил поставки — нет нужных комплектаций',
+  'Сезонный спад: клиентов меньше на 30%',
+  'Рост цен на авто из-за курса валют',
+  'Буранов С.В. отметил рост CSI в группе',
+  'Банки снизили ставки — кредитный спрос вырос',
+  'Маркетинговая кампания ГК привела новых лидов',
+  'Сотрудник месяца по ГК получил BMW на год',
+  'Запущена программа трейд-ин с повышенным бонусом',
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const G={
+  brand:null,name:'',exp:'new',goal:'money',startSkill:'nego',
+  day:1,month:1,_date:new Date(2026,0,1),
+  dayPhase:0, // 0=morning, 1..N=day events, N+1=evening
+  mood:100,nrg:100,stress:0,burnout:0,rep:50,csi:100,
+  xp:0,level:0,
+  money:0,debt:0,
+  monthSales:0,totalSales:0,revenue:0,totalEarned:0,
+  badMonths:0,
+  skills:{nego:1,credit:1,tech:1,service:1,hustle:1},
+  cols:{kate:50,ruslan:40,lena:60},
+  housing:'room',transport:'bus',
+  owned:[],monthly_items:[],lifeLevel:0,
+  achievements:[],vipDeals:0,calcStreak:0,schemeCount:0,
+  demotions:0,cleanSchemes:true,
+  recentRandIds:[],usedMorningIdx:[],worldEvents:[],
+  worldEventLog:[],
+};
+
+// ══════════════════════════════════════════
 //  HELPERS
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-const MONTHS=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const DOWNAMES=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
 const MONTHS_GEN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MONTHS_NOM=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
-function show(id){
-  document.querySelectorAll('.scr').forEach(s=>{s.classList.remove('on');});
-  document.getElementById(id).classList.add('on');
-}
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
 function closeMo(id){document.getElementById(id).classList.remove('on');}
+
 function save(){
-  try{localStorage.setItem('bac6',JSON.stringify({...G,brand:G.brand?.id,_date:G._date.toISOString()}));
-    const d=document.getElementById('tab-work'); // subtle feedback
-  }catch(e){}
+  try{localStorage.setItem('bac7',JSON.stringify({...G,brand:G.brand?.id,_date:G._date.toISOString()}));}catch(e){}
 }
+
 function addLog(msg){
   const w=document.getElementById('logw');
   const h=`${8+G.dayPhase*4}:${String(rnd(0,59)).padStart(2,'0')}`;
   const e=document.createElement('div');e.className='logi';
   e.innerHTML=`<span class="logt">${h}</span><span>${msg}</span>`;
   w.insertBefore(e,w.firstChild);
-  if(w.children.length>30)w.removeChild(w.lastChild);
+  if(w.children.length>25)w.removeChild(w.lastChild);
 }
+
 function banner(msg,type='ok'){
   const el=document.getElementById('banner');
   const ic={'ok':'✓','fail':'✗','warn':'⚠','info':'ℹ','danger':'⛔'}[type]||'✓';
   el.innerHTML=`<span>${ic}</span><span>${msg}</span>`;
   el.className='banner '+type;
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>el.className='banner',4000);
+  clearTimeout(el._t);el._t=setTimeout(()=>el.className='banner',4500);
 }
+
 function npcH(k,l){
-  const n=NPCS_DATA[k]||NPCS_DATA.tagirovich;
+  const n=NPC[k]||NPC.tagirovich;
   return `<div class="enpc" style="--nc:${n.c}"><div class="enpc-av">${n.em}</div><div><div class="enpc-nm">${n.n}</div><div class="enpc-tx">${l}</div></div></div>`;
 }
+
 function unlockAch(id){
   if(G.achievements.includes(id))return;
   const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return;
@@ -993,241 +1299,226 @@ function unlockAch(id){
   document.getElementById('apic').textContent=a.ic;
   document.getElementById('apnm').textContent=a.n;
   document.getElementById('apds').textContent=a.ds;
-  const pop=document.getElementById('achpop');
-  pop.classList.add('on');
-  setTimeout(()=>pop.classList.remove('on'),3200);
-  G.xp+=15;updateCareer();
+  const p=document.getElementById('achpop');p.classList.add('on');
+  setTimeout(()=>p.classList.remove('on'),3000);
+  G.xp+=15;updateCareerUI();
 }
+
 function checkAchs(){
   if(G.totalSales>=1)unlockAch('first_sale');
   if(G.totalSales>=10)unlockAch('ten_sales');
   if(G.monthSales>=CAREER[G.level].plan)unlockAch('plan_done');
   if(G.monthSales>=Math.round(CAREER[G.level].plan*1.5))unlockAch('plan_150');
-  if(G.money>=1000000)unlockAch('millionaire');
+  if(G.money>=1000000)unlockAch('million');
   if(G.level>=1)unlockAch('promo');
   if(G.vipDeals>=5)unlockAch('vip5');
-  if(G.calcStreak>=5)unlockAch('calc_expert');
+  if(G.calcStreak>=5)unlockAch('calc_5');
   if(G.level>=4)unlockAch('director');
   if(G.debt===0&&G.month>2)unlockAch('no_debt');
-  if(G.demotions>=1&&G.level>=2)unlockAch('recovery');
+  if(G.demotions>=1&&G.level>=2)unlockAch('comeback');
+  if(G.cleanSchemes&&G.month>=3)unlockAch('clean');
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  CALENDAR
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 function updateCalendar(){
-  const d=G._date;
-  const dow=d.getDay();// 0=Sun
-  const dowNames=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-  document.getElementById('cal-date').textContent=`${dowNames[dow]}, ${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
-  const isWeekend=dow===0||dow===6;
-  const daysInMonth=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
-  const dayOfMonth=d.getDate();
-  const isMonthEnd=dayOfMonth>=daysInMonth-3;
-  const badge=document.getElementById('cal-badge');
-  if(isWeekend){badge.textContent='ВЫХОДНОЙ';badge.className='cal-badge weekend';}
-  else if(isMonthEnd){badge.textContent='КОНЕЦ МЕСЯЦА';badge.className='cal-badge monthend';}
-  else{badge.textContent='РАБОЧИЙ';badge.className='cal-badge work';}
-  document.getElementById('cal-sub').textContent=`Месяц ${G.month} · ${MONTHS[d.getMonth()]}`;
-  return{isWeekend,isMonthEnd,dow};
+  const d=G._date;const dow=d.getDay();
+  const isWknd=dow===0||dow===6;
+  const dom=d.getDate();const dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  const isMonthEnd=dom>=dim-3;
+  document.getElementById('cal-d').textContent=`${DOWNAMES[dow]}, ${dom} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('cal-s').textContent=`Месяц ${G.month} · ${MONTHS_NOM[d.getMonth()].toLowerCase()}`;
+  const b=document.getElementById('cbadge');
+  if(isWknd){b.textContent='ВЫХОДНОЙ';b.className='cbadge wknd';}
+  else if(isMonthEnd){b.textContent='КОНЕЦ МЕСЯЦА';b.className='cbadge mend';}
+  else{b.textContent='РАБОЧИЙ';b.className='cbadge work';}
+  return{isWknd,isMonthEnd,dow};
 }
 
-function advanceDay(){
-  G._date=new Date(G._date.getTime()+86400000);
-  G.day++;
-  if(G._date.getDay()===1) G.week=(G.week||1)+1; // new week on Monday
-  // Month rollover
-  if(G._date.getDate()===1&&G.day>2){
-    G.month++;
-    showMonthReport();
-    return;
-  }
-  G.dayPhase=0;G.phaseEvent=0;
-  updateCalendar();
-  pickEvent();
-}
-
-// ════════════════════════════════════════
-//  HUD UPDATE
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
+//  HUD
+// ══════════════════════════════════════════
 function updateHUD(){
   const car=CAREER[G.level];
   document.getElementById('tb-nm').textContent=G.name;
   document.getElementById('tb-ps').textContent=car.t;
-  document.getElementById('tb-ava').textContent=car.icon;
+  document.getElementById('tb-ava').textContent=car.ic;
   document.getElementById('vm2').textContent=fmt(G.money);
   document.getElementById('vs').textContent=G.stress;
-  const ss=document.getElementById('sstress');
-  ss.className='ts'+(G.stress>70?' r':G.stress>40?' w':'');
-  // stats bar
+  const cs=document.getElementById('chip-stress');
+  cs.className='chip'+(G.stress>70?' r':G.stress>40?' w':'');
+  // stat bars
   const stats=[
     {id:'mood',v:G.mood,c:G.mood>60?'#22C55E':G.mood>35?'#F97316':'#EF4444'},
-    {id:'energy',v:G.energy,c:G.energy>50?'#3B82F6':'#F97316'},
-    {id:'stress',v:G.stress,c:G.stress<40?'#22C55E':G.stress<70?'#F97316':'#EF4444'},
-    {id:'burn',v:G.burnout,c:G.burnout<40?'#22C55E':G.burnout<70?'#F97316':'#EF4444'},
+    {id:'nrg',v:G.nrg,c:G.nrg>50?'#3B82F6':'#F97316'},
+    {id:'str',v:G.stress,c:G.stress<40?'#22C55E':G.stress<70?'#F97316':'#EF4444'},
+    {id:'brn',v:G.burnout,c:G.burnout<40?'#22C55E':G.burnout<70?'#F97316':'#EF4444'},
     {id:'rep',v:G.rep,c:'#D4A84B'},
     {id:'csi',v:G.csi,c:'#A855F7'},
   ];
   stats.forEach(s=>{
-    const f=document.getElementById('sf-'+s.id);const vl=document.getElementById('sv-'+s.id);
+    const f=document.getElementById('sf-'+s.id);const v=document.getElementById('sv-'+s.id);
     if(f){f.style.width=s.v+'%';f.style.background=s.c;}
-    if(vl)vl.textContent=s.v;
+    if(v){v.textContent=s.v;v.className='stat-v'+(s.v<20?' danger':'');}
   });
-  // plan bar
-  const plan=car.plan;
-  const pp=Math.min(150,Math.round(G.monthSales/plan*100));
-  const pf=document.getElementById('pf');
-  pf.style.width=Math.min(100,pp)+'%';
-  pf.className='plan-f'+(pp>=100?' over':'');
+  // plan
+  const pp=Math.min(150,Math.round(G.monthSales/car.plan*100));
+  document.getElementById('pf').style.width=Math.min(100,pp)+'%';
+  document.getElementById('pf').className='plan-f'+(pp>=100?' over':'');
   document.getElementById('ppct').textContent=pp+'%';
-  // stress badge in scene header
-  const tsb=document.getElementById('tod-stress-badge');
+  // stress pill in work tab
+  const sp=document.getElementById('stress-pill');const tsp=document.getElementById('tod-ic').closest('.tod-row')?.querySelector('.stress-pill');
   if(G.stress>65){
-    tsb.style.display='inline-block';
-    tsb.textContent=`🔥 Стресс ${G.stress}% — решения хуже`;
-    tsb.style.background='var(--ora-bg)';tsb.style.color='var(--ora)';
-    tsb.style.border='1px solid #F9731618';tsb.style.borderRadius='5px';
-    tsb.style.fontSize='10px';tsb.style.padding='1px 7px';
-  } else tsb.style.display='none';
+    const spEl=document.getElementById('stress-pill');
+    spEl.style.display='inline-block';spEl.textContent=`🔥 Стресс ${G.stress}% — решения хуже`;
+  } else {
+    document.getElementById('stress-pill').style.display='none';
+  }
 }
 
-function updateCareer(){
-  document.getElementById('career-steps').innerHTML=CAREER.map((c,i)=>`
-    <div style="display:flex;align-items:center;gap:6px;padding:3px 5px;border-radius:5px;font-size:11px;margin-bottom:2px;
-      color:${i<G.level?'var(--grn)':i===G.level?'var(--txt)':'var(--t2)'};
-      background:${i===G.level?'var(--red-bg)':'transparent'};
-      border:${i===G.level?'1px solid #C8102E18':'1px solid transparent'}">
-      <div style="width:7px;height:7px;border-radius:50%;background:${i<G.level?'var(--grn)':i===G.level?'var(--red)':'var(--b2)'}"></div>
-      <span>${c.icon} ${c.t}</span>
-      ${i===G.level?`<span style="margin-left:auto;font-size:9px;color:var(--t2)">${c.sal.toLocaleString()}₽/мес</span>`:''}
+function updateCareerUI(){
+  const car=CAREER[G.level];
+  document.getElementById('career-path').innerHTML=CAREER.map((c,i)=>`
+    <div class="career-step ${i<G.level?'done':i===G.level?'curr':''}">
+      <div class="cs-dot"></div>
+      <span>${c.ic} ${c.t}</span>
+      ${i===G.level?`<span style="margin-left:auto;font-size:9px;color:var(--t2)">${fmt(c.sal)}₽/мес</span>`:''}
     </div>`).join('');
   const xpNext=G.level<CAREER.length-1?CAREER[G.level+1].xp:9999;
-  const xpPrev=CAREER[G.level].xp;
+  const xpPrev=car.xp;
   const pct=xpNext>xpPrev?clamp((G.xp-xpPrev)/(xpNext-xpPrev)*100,0,100):100;
   document.getElementById('xpbar').style.width=pct+'%';
-  document.getElementById('xp-info').textContent=xpNext===9999?'MAX':`${G.xp} / ${xpNext}`;
-  document.getElementById('skills-display').innerHTML=SKILLS.map(s=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-      <span style="font-size:11px;color:var(--t2)">${s.ic} ${s.n}</span>
-      <div style="display:flex;gap:2px">${Array.from({length:5},(_,i)=>`<div style="width:7px;height:7px;border-radius:50%;background:${i<(G.skills[s.id]||1)?'var(--gold)':'var(--d4)'}"></div>`).join('')}</div>
-    </div>`).join('');
-  document.getElementById('col-display').innerHTML=COLS.map(c=>`
-    <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
-      <div style="width:24px;height:24px;border-radius:50%;background:var(--d4);display:flex;align-items:center;justify-content:center;font-size:11px">${c.em}</div>
-      <div style="flex:1"><div style="font-size:11px;font-weight:600">${c.n}</div><div style="font-size:9px;color:var(--t2)">${c.role}</div>
-      <div style="height:2px;background:var(--dark);border-radius:1px;overflow:hidden;margin-top:2px"><div style="height:100%;border-radius:1px;background:${c.c};width:${G.cols[c.id]}%;transition:width .4s"></div></div></div>
-    </div>`).join('');
-  const ownedHousing=LIFE_ITEMS.housing.find(x=>x.id===G.housing);
-  const ownedTransport=LIFE_ITEMS.transport.find(x=>x.id===G.transport);
-  document.getElementById('lifestyle-status').innerHTML=`
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <div style="background:var(--d3);border-radius:7px;padding:6px 10px;font-size:11px"><span style="color:var(--t2)">Жильё</span><br/><b>${ownedHousing?.ic} ${ownedHousing?.n||'комната'}</b></div>
-      <div style="background:var(--d3);border-radius:7px;padding:6px 10px;font-size:11px"><span style="color:var(--t2)">Транспорт</span><br/><b>${ownedTransport?.ic} ${ownedTransport?.n||'автобус'}</b></div>
-      <div style="background:var(--d3);border-radius:7px;padding:6px 10px;font-size:11px"><span style="color:var(--t2)">Долг</span><br/><b style="color:${G.debt>0?'var(--dgr)':'var(--grn)'}">${G.debt>0?fmt(G.debt)+'₽':'Нет долга'}</b></div>
-    </div>`;
-  const achEl=document.getElementById('ach-display');
-  achEl.innerHTML=G.achievements.length===0?'<span style="color:var(--t3)">Пока нет</span>':
-    G.achievements.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);return a?`<span title="${a.n}" style="font-size:16px;margin-right:2px">${a.ic}</span>`:''}).join('');
-  // Stats tab
-  const car=CAREER[G.level];
-  document.getElementById('fin-display').innerHTML=`
+  document.getElementById('xp-info').textContent=xpNext===9999?'MAX':`${G.xp}/${xpNext}`;
+  document.getElementById('skills-d').innerHTML=SKILLS.map(s=>`
+    <div class="sk-row"><span class="sk-n">${s.ic} ${s.n}</span>
+    <div class="sk-stars">${Array.from({length:5},(_,i)=>`<div class="sk-star${i<(G.skills[s.id]||1)?' f':''}"></div>`).join('')}</div></div>`).join('');
+  document.getElementById('cols-d').innerHTML=COLS.map(c=>`
+    <div class="col-row"><div class="col-av">${c.em}</div>
+    <div style="flex:1"><div class="col-n">${c.n}</div><div class="col-r">${c.role}</div>
+    <div class="rel-bar"><div class="rel-f" style="width:${G.cols[c.id]}%;background:${c.c}"></div></div></div></div>`).join('');
+  const ad=document.getElementById('ach-d');
+  ad.innerHTML=G.achievements.length===0?'<span style="color:var(--t3)">Пока нет</span>':
+    G.achievements.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);return a?`<span title="${a.n}" style="font-size:16px;margin-right:3px">${a.ic}</span>`:''}).join('');
+  // finance
+  const monthlyExtra=G.monthly_items.reduce((a,id)=>{
+    const it=[...LIFE.housing,...LIFE.transport,...LIFE.style,...LIFE.relax].find(x=>x.id===id);
+    return a+(it?.mon||0);
+  },0);
+  document.getElementById('fin-d').innerHTML=`
     <div style="display:flex;flex-direction:column;gap:4px;font-size:12px">
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Баланс</span><b style="color:${G.money>=0?'var(--gold)':'var(--dgr)'}">${fmt(G.money)}₽</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Долг</span><b style="color:${G.debt>0?'var(--dgr)':'var(--grn)'}">${G.debt>0?fmt(G.debt)+'₽':'0₽'}</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Оклад</span><b>${fmt(car.sal)}₽</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Расходы/мес</span><b style="color:var(--dgr)">-${fmt(car.exp + G.monthly_items.reduce((a,id)=>{const it=[...LIFE_ITEMS.housing,...LIFE_ITEMS.transport,...LIFE_ITEMS.lifestyle,...LIFE_ITEMS.relax].find(x=>x.id===id);return a+(it?.monthly||0);},0))}₽</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Расходы/мес</span><b style="color:var(--dgr)">-${fmt(car.exp+monthlyExtra)}₽</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Всего заработано</span><b style="color:var(--gold)">${fmt(G.totalEarned)}₽</b></div>
     </div>`;
-  document.getElementById('month-display').innerHTML=`
+  document.getElementById('month-d').innerHTML=`
     <div style="display:flex;flex-direction:column;gap:4px;font-size:12px">
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Продажи мес.</span><b style="color:var(--red)">${G.monthSales}/${car.plan}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Продажи</span><b style="color:var(--red)">${G.monthSales}/${car.plan}</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Выполнение</span><b>${Math.round(G.monthSales/car.plan*100)}%</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">CSI</span><b style="color:var(--pur)">${G.csi}%</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Репутация</span><b style="color:var(--gold)">${G.rep}</b></div>
     </div>`;
-  document.getElementById('risk-display').innerHTML=`
+  document.getElementById('risk-d').innerHTML=`
     <div style="display:flex;flex-direction:column;gap:4px;font-size:12px">
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">⚠️ Плохих мес. подряд</span><b style="color:${G.badMonths>0?'var(--dgr)':'var(--grn)'}">${G.badMonths}/2</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">💀 Выгорание</span><b style="color:${G.burnout>60?'var(--dgr)':G.burnout>30?'var(--ora)':'var(--grn)'}">${G.burnout}%</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">🔥 Стресс</span><b style="color:${G.stress>60?'var(--dgr)':G.stress>35?'var(--ora)':'var(--grn)'}">${G.stress}%</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Понижений было</span><b>${G.demotions}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">⚠️ Плохих мес. подряд</span><b class="${G.badMonths>0?'kmv danger':''}">${G.badMonths}/2</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">💀 Выгорание</span><b class="${G.burnout>60?'kmv danger':G.burnout>30?'kmv warn':''}">${G.burnout}%</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">🔥 Стресс</span><b class="${G.stress>60?'kmv danger':G.stress>35?'kmv warn':''}">${G.stress}%</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">🎲 Серых схем</span><b class="${G.schemeCount>0?'kmv warn':''}">${G.schemeCount}</b></div>
     </div>`;
+  // world events
+  if(G.worldEventLog.length>0){
+    document.getElementById('world-d').innerHTML=G.worldEventLog.slice(-5).reverse().map(e=>`<div style="font-size:11px;color:var(--t2);padding:3px 0;border-bottom:1px solid var(--b1)">${e}</div>`).join('');
+  }
+  // life level
+  const ll=Math.min(100,Math.round((
+    (LIFE.housing.findIndex(x=>x.id===G.housing))*8+
+    (LIFE.transport.findIndex(x=>x.id===G.transport))*12+
+    G.owned.length*5+G.month*2
+  )));
+  G.lifeLevel=ll;
 }
 
 function gainXP(n){
   G.xp+=n;
   const next=G.level+1;
   if(next<CAREER.length&&G.xp>=CAREER[next].xp){G.level=next;showPromo();}
-  updateCareer();updateHUD();
+  updateCareerUI();updateHUD();
 }
-function gainSkill(id,n=1){if(!id)return;G.skills[id]=clamp((G.skills[id]||1)+n,1,5);updateCareer();}
-function gainCol(id,n=10){if(!id||G.cols[id]===undefined)return;G.cols[id]=clamp(G.cols[id]+n,0,100);updateCareer();}
+function gainSkill(id,n=1){if(!id)return;G.skills[id]=clamp((G.skills[id]||1)+n,1,5);updateCareerUI();}
+function gainCol(id,n=10){if(!id||G.cols[id]===undefined)return;G.cols[id]=clamp(G.cols[id]+n,0,100);updateCareerUI();}
+function gainColRuslan(n){G.cols.ruslan=clamp(G.cols.ruslan+n,0,100);updateCareerUI();}
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  CAREER TRANSITIONS
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 function showPromo(){
   const car=CAREER[G.level];
-  document.getElementById('lu-ic').textContent=car.icon;
+  document.getElementById('lu-ic').textContent=car.ic;
   document.getElementById('lu-ti').textContent='Повышение: '+car.t+'!';
-  document.getElementById('lu-tx').textContent=`Оклад: ${fmt(car.sal)}₽/мес. План теперь ${car.plan} авто — ожидания выросли.`;
-  document.getElementById('lu-p').innerHTML=car.perks.map(p=>`<div class="perk"><span>✅</span><span>${p}</span></div>`).join('');
+  document.getElementById('lu-tx').textContent=`Оклад: ${fmt(car.sal)}₽/мес. План теперь ${car.plan} авто.`;
+  document.getElementById('lu-p').innerHTML=(car.perks||[]).map(p=>`<div class="perk"><span>✅</span><span>${p}</span></div>`).join('');
   document.getElementById('lumo').classList.add('on');
   unlockAch('promo');
 }
-function demotion(){
+
+function showDemotion(){
   if(G.level<=0){showFire();return;}
   G.level--;G.demotions++;
   const car=CAREER[G.level];
-  document.getElementById('demo-ti').textContent=`Понижение → ${car.t}`;
-  document.getElementById('demo-tx').textContent=`Два месяца подряд план провален. Буранов С.В. вынужден пересмотреть вашу должность. Теперь вы ${car.t}. Покажите результат.`;
+  document.getElementById('demo-ti').textContent='Понижение → '+car.t;
+  document.getElementById('demo-tx').textContent=`Два месяца план ниже 60%. Буранов С.В. пересматривает вашу должность. Теперь вы ${car.t}. Покажите результат.`;
   document.getElementById('demomo').classList.add('on');
   G.stress=clamp(G.stress+30,0,100);G.rep=clamp(G.rep-20,0,100);G.badMonths=0;
 }
+
 function showFire(){
   const car=CAREER[G.level];
   document.getElementById('fire-tx').textContent=`${G.monthSales} из ${car.plan} — ${Math.round(G.monthSales/car.plan*100)}%. Два месяца подряд. Марат Тагирович подписал приказ.`;
   document.getElementById('firemo').classList.add('on');
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  MONTHLY REPORT
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 function showMonthReport(){
   const car=CAREER[G.level];
   const pct=Math.round(G.monthSales/car.plan*100);
-  // Salary
   const bonus=pct>=150?car.sal*.7:pct>=120?car.sal*.5:pct>=100?car.sal*.3:pct>=80?car.sal*.1:0;
   const earned=car.sal+bonus;
   G.totalEarned+=earned;G.money+=earned;
-  // Expenses
-  const monthlyItems=G.monthly_items.reduce((a,id)=>{
-    const it=[...LIFE_ITEMS.housing,...LIFE_ITEMS.transport,...LIFE_ITEMS.lifestyle,...LIFE_ITEMS.relax].find(x=>x.id===id);
-    return a+(it?.monthly||0);
+  const monthlyExtra=G.monthly_items.reduce((a,id)=>{
+    const it=[...LIFE.housing,...LIFE.transport,...LIFE.style,...LIFE.relax].find(x=>x.id===id);return a+(it?.mon||0);
   },0);
-  const totalExp=car.exp+monthlyItems;
+  const totalExp=car.exp+monthlyExtra;
   G.money-=totalExp;
-  // Debt interest
   if(G.debt>0){const int=Math.round(G.debt*.025);G.debt+=int;const pay=Math.min(G.debt,Math.round(earned*.2));G.money-=pay;G.debt-=pay;}
-  // Natural recovery
-  G.stress=clamp(G.stress-15,0,100);
-  G.burnout=clamp(G.burnout-5,0,100);
+  // Burnout and stress natural recovery
+  G.stress=clamp(G.stress-15,0,100);G.burnout=clamp(G.burnout-5,0,100);
   if(G.mood<35)G.csi=clamp(G.csi-8,0,100);
-  // Risk logic
-  if(pct<60){G.badMonths++;if(G.badMonths>=2)setTimeout(()=>demotion(),600);}
+  // Risk
+  if(pct<60){G.badMonths++;if(G.badMonths>=2)setTimeout(()=>showDemotion(),600);}
   else G.badMonths=0;
-  G.monthSalesHistory.push(G.monthSales);
+  // World event
+  const we=WORLD_EVENTS[rnd(0,WORLD_EVENTS.length-1)];
+  G.worldEventLog.push(`М${G.month}: ${we}`);
+  if(G.worldEventLog.length>10)G.worldEventLog.shift();
+  // Headhunting (every 2-3 months if rep > 65)
+  if(G.month%3===0&&G.rep>65&&Math.random()<0.5){
+    const offer=HH_OFFERS(G);if(offer)setTimeout(()=>showHeadhunt(offer),1500);
+  }
   checkAchs();
   let grade,gc,nk,nc;
-  if(pct>=150){grade='🚀 РЕКОРД';gc='#A855F7';nk='buranow';nc=`${G.name}! Феноменально. ${G.monthSales} авто — лучший по группе. Буранов лично поздравляет.`;}
-  else if(pct>=100){grade='🏆 100%+ план';gc='#D4A84B';nk='buranow';nc=`Отличный результат, ${G.name}! Бонус перечислен.`;}
-  else if(pct>=80){grade='✅ Хорошо';gc='#22C55E';nk='tagirovich';nc='Не дотянули чуть-чуть. Следующий месяц закроем!';}
-  else if(pct>=60){grade='⚠️ Ниже плана';gc='#F97316';nk='tagirovich';nc=`${car.plan-G.monthSales} авто не хватило. ${G.badMonths>0?'Второй раз подряд — следующий месяц решающий.':'Нужно улучшить подход.'}`;}
-  else{grade='❌ Провал';gc='#EF4444';nk='ismagilov';nc=`${pct}% — критически мало. ${G.badMonths>=2?'Вынужден принять меры.':'Последнее предупреждение.'}`;}
+  if(pct>=150){grade='🚀 РЕКОРД';gc='#A855F7';nk='buranow';nc=`${G.name}! ${G.monthSales} авто — лучший по группе. Буранов лично звонит.`;}
+  else if(pct>=100){grade='🏆 100%+';gc='#D4A84B';nk='buranow';nc=`Отличный результат! Бонус перечислен.`;}
+  else if(pct>=80){grade='✅ Хорошо';gc='#22C55E';nk='tagirovich';nc='Немного не дотянули. В следующем закроем!';}
+  else if(pct>=60){grade='⚠️ Ниже плана';gc:'#F97316';nk='tagirovich';nc=`${car.plan-G.monthSales} авто не хватило. ${G.badMonths>0?'Второй раз подряд — следующий решающий!':'Нужно улучшить подход.'}`;}
+  else{grade='❌ Провал';gc='#EF4444';nk='ismagilov';nc=`${pct}% — критично. ${G.badMonths>=2?'Меры будут приняты.':'Последнее предупреждение.'}`;}
   document.getElementById('rep-body').innerHTML=`
-    <div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:.9rem">📊 Итоги ${MONTHS[((G.month-2)+12)%12]}</div>
+    <div style="font-size:14px;font-weight:900;text-align:center;margin-bottom:.9rem">📊 Итоги ${MONTHS_NOM[(G.month-2+12)%12]}</div>
     <div class="rg">
-      <div class="ri"><div class="ril">Продажи</div><div class="riv" style="color:var(--red)">${G.monthSalesHistory[G.monthSalesHistory.length-1]}/${car.plan}</div></div>
+      <div class="ri"><div class="ril">Продажи</div><div class="riv" style="color:var(--red)">${G.monthSales}/${car.plan}</div></div>
       <div class="ri"><div class="ril">Выполнение</div><div class="riv" style="color:${gc}">${pct}%</div></div>
       <div class="ri"><div class="ril">CSI</div><div class="riv" style="color:var(--pur)">${G.csi}%</div></div>
       <div class="ri"><div class="ril">Репутация</div><div class="riv">${G.rep}</div></div>
@@ -1236,189 +1527,171 @@ function showMonthReport(){
     <div style="font-size:10px;color:var(--gold);margin-top:2px">Оклад ${fmt(car.sal)}₽${bonus>0?' + бонус '+fmt(bonus)+'₽':''}</div></div>
     <div style="background:var(--d3);border:1px solid var(--b1);border-radius:7px;padding:8px 11px;margin-bottom:.7rem;font-size:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:var(--t2)">Расходы жизни</span><span style="color:var(--dgr)">-${fmt(totalExp)}₽</span></div>
-      ${G.debt>0?`<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:var(--t2)">Погашение долга</span><span style="color:var(--dgr)">-...₽</span></div>`:''}
-      <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--b1);padding-top:4px;margin-top:4px">
-        <span style="color:var(--t2)">Баланс</span>
+      ${G.debt>0?`<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:var(--t2)">Долг (погашено)</span><span style="color:var(--dgr)">-${fmt(Math.min(G.debt,Math.round(earned*.2)))}₽</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;font-weight:800;border-top:1px solid var(--b1);padding-top:4px;margin-top:4px">
+        <span style="color:var(--t2)">Итого</span>
         <span style="color:${G.money>=0?'var(--grn)':'var(--dgr)'}">${G.money>=0?'+':''}${fmt(G.money)}₽</span>
-      </div>
-      ${G.debt>0?`<div style="color:var(--ora);font-size:10px;margin-top:3px">⚠️ Долг: ${fmt(G.debt)}₽ (2.5%/мес)</div>`:''}
+      </div>${G.debt>0?`<div style="color:var(--ora);font-size:10px;margin-top:3px">⚠️ Долг: ${fmt(G.debt)}₽ (2.5%/мес)</div>`:''}
     </div>
+    <div style="font-size:11px;color:var(--t2);background:var(--d3);border-radius:7px;padding:6px 10px;margin-bottom:.7rem">🌍 ${we}</div>
     ${npcH(nk,nc)}
-    ${G.badMonths===1?`<div style="background:var(--ora-bg);border:1px solid #F9731618;border-radius:7px;padding:7px 10px;font-size:11px;color:var(--ora);margin-top:.7rem">⚠️ Предупреждение: ещё один плохой месяц → понижение!</div>`:''}`;
+    ${G.badMonths===1?`<div style="background:var(--orabg);border:1px solid #F9731618;border-radius:7px;padding:7px 10px;font-size:11px;color:var(--ora);margin-top:.7rem">⚠️ Ещё один плохой месяц → понижение!</div>`:''}`;
   document.getElementById('repmo').classList.add('on');
-  // Reset monthly
   G.monthSales=0;G.month++;
 }
-function closeRep(){
-  closeMo('repmo');
-  updateHUD();updateCareer();
-  G.dayPhase=0;G.phaseEvent=0;
-  pickEvent();
-}
+function closeRep(){closeMo('repmo');G._date=new Date(G._date.getFullYear(),G._date.getMonth()+1,1);G.dayPhase=0;updateHUD();updateCalendar();updateCareerUI();pickEvent();}
 
-// ════════════════════════════════════════
-//  BURNOUT
-// ════════════════════════════════════════
-function checkBurnout(){
-  if(G.burnout>=95&&!document.getElementById('burnmo').classList.contains('on')){
-    const box=document.getElementById('burn-ch');
-    box.innerHTML='';
-    const opts=[
-      {ic:'✈️',t:'Срочный отпуск — 80 000₽',s:'-60 выгорание, -40 стресс, +5 дней',cost:80000,burn:-60,stress:-40,skip:5},
-      {ic:'🏠',t:'Больничный — 3 дня дома',s:'-30 выгорание, пропустить продажи',burn:-30,stress:-20,skip:3,mood:20},
-    ];
-    opts.forEach(ch=>{
-      const btn=document.createElement('button');btn.className='chb';
-      btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div><div class="chs">${ch.s}</div></div>`;
-      btn.onclick=()=>{
-        if(ch.cost)G.money-=ch.cost;
-        if(ch.burn)G.burnout=clamp(G.burnout+ch.burn,0,100);
-        if(ch.stress)G.stress=clamp(G.stress+ch.stress,0,100);
-        if(ch.mood)G.mood=clamp(G.mood+ch.mood,0,100);
-        if(ch.skip){for(let i=0;i<ch.skip;i++){G._date=new Date(G._date.getTime()+86400000);G.day++;}}
-        addLog(`${ch.t} — выгорание снижено`);
-        unlockAch('survived_burn');
-        closeMo('burnmo');updateHUD();updateCareer();pickEvent();
-      };
-      box.appendChild(btn);
-    });
-    document.getElementById('burnmo').classList.add('on');
-  }
-}
-
-// ════════════════════════════════════════
-//  CALCULATOR
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
+//  CALCULATOR v2 — enhanced mechanic
+// ══════════════════════════════════════════
 let CS={price:2000000,down:20,term:36,rate:18.9};
-function calcVerdict(){
-  const loan=CS.price*(1-CS.down/100);const r=CS.rate/100/12,n=CS.term;
-  const pay=r?loan*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1):loan/n;
-  let score=100;
-  if(CS.down<15)score-=25;if(CS.rate>22)score-=30;else if(CS.rate>17)score-=15;
-  if(n>72)score-=20;else if(n>60)score-=10;if(pay>CS.price*.04)score-=20;
-  score=clamp(score,0,100);
-  if(score>=70)return{v:'good',t:`✅ Выгодно клиенту — высокий шанс одобрения`,score,bonus:1};
-  if(score>=45)return{v:'warn',t:`⚠️ Приемлемо, но клиент может сомневаться`,score,bonus:0};
-  return{v:'bad',t:`❌ Тяжёлые условия — риск отказа клиента`,score,bonus:-1};
-}
-window.updCalc=function(){
-  const loan=CS.price*(1-CS.down/100);const r=CS.rate/100/12,n=CS.term;
+
+function calcAnalysis(){
+  const loan=CS.price*(1-CS.down/100);
+  const r=CS.rate/100/12,n=CS.term;
   const pay=r?loan*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1):loan/n;
   const over=pay*n-loan;
-  ['cp','co','ct'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=i===0?fmt(pay)+'₽':i===1?fmt(over)+'₽':fmt(pay*n+CS.price*CS.down/100)+'₽';});
-  const ve=document.getElementById('cv');if(ve){const rv=calcVerdict();ve.className='verdict '+rv.v;ve.innerHTML=`<span>${rv.t}</span><span class="verdict-sc">${rv.score}/100</span>`;}
+  const total=pay*n+CS.price*CS.down/100;
+  // Commission ~0.5-2% of loan depending on term and rate
+  const commission=Math.round(loan*(CS.rate>20?0.005:CS.rate>15?0.01:0.018)*(n/12));
+  // Approval chance
+  let chance=85;
+  if(CS.down<15)chance-=25;if(CS.rate>22)chance-=30;else if(CS.rate>17)chance-=12;
+  if(n>72)chance-=15;else if(n>60)chance-=5;if(pay>CS.price*.042)chance-=18;
+  chance=clamp(chance,5,98);
+  // Client mood
+  const mood=chance>75?'😊 Клиент доволен условиями':chance>50?'😐 Клиент сомневается':'😤 Клиент недоволен';
+  // Score
+  const score=Math.round(chance*.7+(CS.down>=20?20:CS.down)*.3);
+  const vc=score>=70?'good':score>=45?'ok':'bad';
+  return{pay,over,total,commission,chance,mood,score,vc};
+}
+
+window.updCalc=function(){
+  const a=calcAnalysis();
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('cp',fmt(a.pay)+'₽');setEl('co',fmt(a.over)+'₽');setEl('ct',fmt(a.total)+'₽');
+  setEl('cc',fmt(a.commission)+'₽');
+  const ve=document.getElementById('cv');
+  if(ve){
+    ve.className='calc-verdict '+a.vc;
+    ve.innerHTML=`<span>${a.mood}</span><span class="cv-score">${a.score}/100</span>`;
+    const det=document.getElementById('cv-det');
+    if(det)det.textContent=`Шанс одобрения: ${a.chance}% · Комиссия менеджера: ${fmt(a.commission)}₽`;
+  }
 };
+
 function calcH(minP,maxP){
   const ip=rnd(minP*1000,maxP*1000);CS={price:ip,down:20,term:36,rate:18.9};
-  return `<div class="calc"><div class="calch">💳 Кредитный калькулятор</div>
-  <div class="calc-mechanic">🎮 <b>Механика:</b> точный подбор = бонус к продаже. Ошибка = клиент отказывается!</div>
+  return `<div class="calc">
+  <div class="calch">💳 Кредитный калькулятор</div>
+  <div class="calc-info">🎮 <b>Механика:</b> чем точнее условия → выше шанс одобрения и выше комиссия менеджера. Плохой расчёт = клиент отказывается!</div>
   <div class="cr"><label>Стоимость</label><input type=range min=${Math.round(minP*700)} max=${Math.round(maxP*1300)} value=${ip} step=50000 oninput="CS.price=+this.value;document.getElementById('cpv').textContent=Math.round(this.value/1000)+'тыс.₽';updCalc()"><div class="crv" id="cpv">${Math.round(ip/1000)}тыс.₽</div></div>
   <div class="cr"><label>Взнос</label><input type=range min=10 max=60 value=20 step=5 oninput="CS.down=+this.value;document.getElementById('cdv').textContent=this.value+'%';updCalc()"><div class="crv" id="cdv">20%</div></div>
   <div class="cr"><label>Срок</label><input type=range min=12 max=84 value=36 step=12 oninput="CS.term=+this.value;document.getElementById('ctv').textContent=this.value+' мес.';updCalc()"><div class="crv" id="ctv">36 мес.</div></div>
   <div class="cr"><label>Ставка</label><input type=range min=5.9 max=29.9 value=18.9 step=0.5 oninput="CS.rate=+this.value;document.getElementById('crv2').textContent=(+this.value).toFixed(1)+'%';updCalc()"><div class="crv" id="crv2">18.9%</div></div>
-  <div class="cres"><div class="cri"><div class="cril">Платёж</div><div class="criv" id="cp">—</div></div><div class="cri"><div class="cril">Переплата</div><div class="criv" id="co">—</div></div><div class="cri"><div class="cril">Итого</div><div class="criv" id="ct">—</div></div></div>
-  <div class="verdict warn" id="cv">Двигайте ползунки для оценки</div></div>`;
+  <div class="calc-results four">
+    <div class="cri"><div class="cril">Платёж/мес</div><div class="criv" style="color:var(--gold)" id="cp">—</div></div>
+    <div class="cri"><div class="cril">Переплата</div><div class="criv" style="color:var(--ora)" id="co">—</div></div>
+    <div class="cri"><div class="cril">Итого</div><div class="criv" style="color:var(--tx)" id="ct">—</div></div>
+    <div class="cri"><div class="cril">Ваша комиссия</div><div class="criv" style="color:var(--grn)" id="cc">—</div></div>
+  </div>
+  <div class="calc-verdict ok" id="cv">Двигайте ползунки для оценки</div>
+  <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center" id="cv-det"></div>
+  </div>`;
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  EVENT SYSTEM
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 function pickEvent(){
-  const {isWeekend}=updateCalendar();
-  const car=CAREER[G.level];
-  // Time of day progression: morning → day events × N → evening
-  const phases=[EVENTS_MORNING,EVENTS_DAY,EVENTS_EVENING];
-  const phaseName=['Утро','День','Вечер'];
-  const phaseIcon=['🌅','☀️','🌆'];
-  // How many day-events before evening
+  const{isWknd,isMonthEnd}=updateCalendar();
   const dayEventsCount=2+Math.floor(G.skills.hustle/2);
 
-  let pool,pLabel,pIcon;
-  if(G.dayPhase===0){pool=EVENTS_MORNING;pLabel=phaseName[0];pIcon=phaseIcon[0];}
-  else if(G.dayPhase<=dayEventsCount){
-    // Pick a day event, avoid repeats
-    const avail=EVENTS_DAY.filter(e=>!G.usedEventIds.includes(e.id));
-    pool=avail.length>0?avail:EVENTS_DAY;
-    pLabel=phaseName[1];pIcon=phaseIcon[1];
-    // If weekend, prefer weekend events
-    if(isWeekend){const we=EVENTS_EVENING.filter(e=>e.isWeekend);if(we.length){pool=we;}}
-  } else {
-    pool=EVENTS_EVENING.filter(e=>!e.isWeekend||isWeekend);
-    pLabel=phaseName[2];pIcon=phaseIcon[2];
-  }
-
-  // Random life event injection every ~5 days
-  if(G.day%5===0&&Math.random()<0.35&&G.dayPhase===1){
-    const eid=RANDOM_EVENTS.filter(e=>!G.recentEventIds.includes(e.id));
-    if(eid.length){
-      const ev=eid[rnd(0,eid.length-1)];
-      G.recentEventIds.push(ev.id);if(G.recentEventIds.length>6)G.recentEventIds.shift();
-      showRandomEvent(ev);return;
+  // Random event injection ~every 5 days
+  if(G.dayPhase===1&&G.day%5===0&&Math.random()<0.38){
+    const pool=RAND_EVENTS.filter(e=>!G.recentRandIds.includes(e.id)&&!e.world);
+    // Occasionally trigger world event
+    const worldPool=RAND_EVENTS.filter(e=>e.world);
+    const all=[...pool,...(Math.random()<.2?worldPool:[])];
+    if(all.length){
+      const ev=all[rnd(0,all.length-1)];
+      G.recentRandIds.push(ev.id);if(G.recentRandIds.length>6)G.recentRandIds.shift();
+      showRandEvent(ev);return;
     }
   }
 
-  const ev=pool[rnd(0,pool.length-1)];
-  if(ev.id)G.usedEventIds.push(ev.id);if(G.usedEventIds.length>10)G.usedEventIds.shift();
+  let evFn,tag,icon;
+  if(G.dayPhase===0){
+    // Morning scenario — avoid repeats
+    const avail=MORNINGS.map((_,i)=>i).filter(i=>!G.usedMorningIdx.includes(i));
+    const idx=avail.length>0?avail[rnd(0,avail.length-1)]:rnd(0,MORNINGS.length-1);
+    G.usedMorningIdx.push(idx);if(G.usedMorningIdx.length>5)G.usedMorningIdx.shift();
+    evFn=MORNINGS[idx];tag='Утро';icon='🌅';
+  } else if(G.dayPhase<=dayEventsCount){
+    evFn=EVENTS_DAY[rnd(0,EVENTS_DAY.length-1)];tag='День';icon='☀️';
+    if(isWknd){evFn=EVENTS_EVE[rnd(0,EVENTS_EVE.length-1)];tag='Выходной';icon='🌿';}
+  } else {
+    evFn=EVENTS_EVE[rnd(0,EVENTS_EVE.length-1)];tag='Вечер';icon='🌆';
+  }
 
-  document.getElementById('tod-ic').textContent=pIcon;
-  document.getElementById('tod-lbl').textContent=pLabel;
+  document.getElementById('tod-ic').textContent=icon;
+  document.getElementById('tod-lbl').textContent=tag;
 
-  const gen=ev.gen(G);
-  renderEvent(ev,gen);
+  const ev=evFn(G);
+  renderEvent(ev);
 }
 
-function renderEvent(ev,gen){
+function renderEvent(ev){
   const card=document.getElementById('ecard');
   card.style.setProperty('--ea',ev.accent||'var(--red)');
   document.getElementById('etag').textContent=ev.tag;
   document.getElementById('etag').style.background=ev.bg||'var(--red-bg)';
   document.getElementById('etag').style.color=ev.accent||'var(--red)';
-  document.getElementById('etag').style.border=`1px solid ${(ev.accent||'#C8102E')}22`;
-  document.getElementById('eday-info').textContent=`День ${G.day} · М${G.month}`;
-
+  document.getElementById('etag').style.border=`1px solid ${(ev.accent||'#C8102E')}20`;
+  document.getElementById('edi').textContent=`День ${G.day} · М${G.month}`;
   let html='';
-  if(G.stress>65)html+=`<div class="stress-warn">🔥 Стресс ${G.stress}% — ваши решения хуже обычного</div>`;
-  html+=`<div class="etxt">${gen.txt}</div>`;
-  if(gen.npc)html+=npcH(gen.npc.k,gen.npc.l);
-  if(gen.hasCalc||ev.hasCalc)html+=calcH(G.brand.p[0],G.brand.p[1]);
+  if(G.stress>65)html+=`<div class="stress-warn">🔥 Стресс ${G.stress}% — решения могут быть хуже обычного</div>`;
+  html+=`<div class="etxt">${ev.txt}</div>`;
+  if(ev.npc)html+=npcH(ev.npc.k,ev.npc.l);
+  if(ev.hasCalc)html+=calcH(G.brand.p[0],G.brand.p[1]);
   document.getElementById('ebody').innerHTML=html;
-  if(gen.hasCalc||ev.hasCalc)setTimeout(updCalc,100);
-
+  if(ev.hasCalc)setTimeout(updCalc,100);
   const box=document.getElementById('choices');box.innerHTML='';
-  (gen.choices||[]).forEach(ch=>{
+  (ev.choices||[]).forEach(ch=>{
     const btn=document.createElement('button');
     btn.className='chb'+(ch.risky?' risky':'');
-    const tagHtml=(ch.tags||[]).map(t=>{
-      const isUp=t.startsWith('+');const isRisk=t.includes('риск');const isDown=t.startsWith('-');
-      const cl=isRisk?'risk':isUp?'up':isDown?'down':'xp';
-      return `<div class="ch-tag ${cl}">${t}</div>`;
+    const tagH=(ch.tags||[]).map(t=>{
+      const cl=t.startsWith('+')?' up':t.startsWith('-')?' dn':t.includes('риск')?' rk':' nt';
+      return `<div class="chtag${cl}">${t}</div>`;
     }).join('');
-    btn.innerHTML=`<div class="chi">${ch.ic}</div><div style="flex:1"><div class="cht">${ch.t}</div><div class="chs">${ch.s}</div>${tagHtml?`<div class="ch-tags">${tagHtml}</div>`:''}</div>`;
-    btn.onclick=()=>applyChoice(ch,gen.hasCalc||ev.hasCalc);
+    btn.innerHTML=`<div class="chi">${ch.ic}</div><div style="flex:1"><div class="cht">${ch.t}</div><div class="chs">${ch.s}</div>${tagH?`<div class="chtags">${tagH}</div>`:''}</div>`;
+    btn.onclick=()=>applyChoice(ch,ev.hasCalc,ev.isVIP);
     box.appendChild(btn);
   });
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  APPLY CHOICE
-// ════════════════════════════════════════
-function applyChoice(ch,hasCalc){
+// ══════════════════════════════════════════
+function applyChoice(ch,hasCalc,isVIPContext){
   document.querySelectorAll('.chb').forEach(b=>b.disabled=true);
   const fx=ch.fx||{};
-  // Stress penalty
-  const stressPenalty=G.stress>75&&Math.random()<.3;
+  const stressHit=G.stress>75&&Math.random()<.28;
 
-  // Calc bonus
-  let calcBonus=0;
+  // Calc mechanic
+  let calcBonus=0,calcCommission=0;
   if(hasCalc){
-    const vr=calcVerdict();
-    if(vr.v==='good'){calcBonus=vr.bonus;G.calcStreak++;banner('🧮 Отличный расчёт! Бонус к сделке','info');}
-    else if(vr.v==='bad'){calcBonus=vr.bonus;G.calcStreak=0;banner('🧮 Плохие условия в расчёте — клиент сомневается','warn');}
-    else G.calcStreak=0;
+    const a=calcAnalysis();
+    calcBonus=a.score>=70?1:a.score>=45?0:-1;
+    calcCommission=a.commission;
+    G.calcStreak=a.score>=70?G.calcStreak+1:0;
+    if(a.score>=70)banner(`🧮 Отличный расчёт! Комиссия: +${fmt(a.commission)}₽. Шанс ${a.chance}%`,'info');
+    else if(a.score<45){banner('🧮 Плохие условия — клиент может отказаться','warn');}
   }
 
-  // Apply base stats
-  if(fx.energy!==undefined)G.energy=clamp(G.energy+fx.energy,0,100);
+  // Stat FX
+  if(fx.nrg!==undefined)G.nrg=clamp(G.nrg+fx.nrg,0,100);
   if(fx.mood!==undefined)G.mood=clamp(G.mood+fx.mood,0,100);
   if(fx.stress!==undefined)G.stress=clamp(G.stress+fx.stress,0,100);
   else if(ch.risky)G.stress=clamp(G.stress+5,0,100);
@@ -1427,206 +1700,306 @@ function applyChoice(ch,hasCalc){
   if(fx.money!==undefined)G.money+=fx.money;
   if(fx.skill)gainSkill(fx.skill);
   if(fx.col)gainCol(fx.col);
-  if(fx.col_ruslan)G.cols.ruslan=clamp(G.cols.ruslan+fx.col_ruslan,0,100);
+  if(fx.col_ruslan!==undefined)gainColRuslan(fx.col_ruslan);
+  if(fx.col_lena!==undefined){G.cols.lena=clamp(G.cols.lena+(fx.col_lena||0),0,100);}
   if(fx.log)addLog(fx.log);
-
-  // Natural burnout increase from stress
+  // Burnout increase from stress
   G.burnout=clamp(G.burnout+(G.stress>60?2:G.stress>40?1:0),0,100);
-  // Energy floor - can't go negative mood
-  if(G.energy<10)G.mood=clamp(G.mood-5,0,100);
+  if(G.nrg<10)G.mood=clamp(G.mood-5,0,100);
+  // Scheme risk tracking
+  if(fx.scheme_risk){G.schemeCount++;G.cleanSchemes=false;if(Math.random()<0.25)setTimeout(()=>triggerSchemeCheck(),2000);}
 
   // Sales resolution
   let saleMsg='';
-  const doSale=(price,money,mul=1)=>{
-    const finalMul=stressPenalty?mul*.9:mul;
+  const doSale=(price,money,mul=1,isVIP=false)=>{
+    const finalMul=stressHit?mul*.88:mul;
     G.monthSales++;G.totalSales++;G.revenue+=price*finalMul;G.money+=money;
-    saleMsg=`💰 Продажа! +${fmt(money)}₽`;
-    if(fx.hasVIP||ch.tags?.includes('VIP'))G.vipDeals++;
+    if(hasCalc&&calcBonus>0){G.money+=calcCommission;}
+    if(isVIP)G.vipDeals++;
+    saleMsg=`💰 Продажа! +${fmt(money+(hasCalc&&calcBonus>0?calcCommission:0))}₽`;
   };
 
-  if(fx.direct_sale){
-    const ds=fx.direct_sale;doSale(ds.price,ds.money,ds.mul||1);
-  } else if(fx.calc_sale){
-    // Calc modifier
-    const cs=fx.calc_sale;const prob=0.7+calcBonus*.15+(G.skills.credit-1)*.05;
+  if(fx.direct_sale){const ds=fx.direct_sale;doSale(ds.price,ds.money,ds.mul||1,isVIPContext);}
+  else if(fx.vip_sale){const vs=fx.vip_sale;doSale(vs.price,vs.money,1.12,true);}
+  else if(fx.calc_sale){
+    const cs=fx.calc_sale;
+    const baseProb=0.65+calcBonus*.18+(G.skills.credit-1)*.04;
+    const prob=stressHit?baseProb-.12:baseProb;
     if(Math.random()<prob){doSale(cs.price,cs.money);}
-    else{saleMsg='❌ Клиент отказался — условия не устроили';G.csi=clamp(G.csi-5,0,100);}
-  } else if(fx.risky_sale){
-    const rs=fx.risky_sale;const prob=rs.prob+(G.skills.nego-1)*.04-(stressPenalty?.15:0);
+    else{saleMsg='❌ Клиент отказался от кредита';G.csi=clamp(G.csi-5,0,100);}
+  }
+  else if(fx.risky_sale){
+    const rs=fx.risky_sale;
+    const prob=rs.prob+(G.skills.nego-1)*.03-(stressHit?.12:0);
     if(Math.random()<prob){doSale(rs.price,rs.money);}
     else{saleMsg='❌ Не получилось';G.stress=clamp(G.stress+5,0,100);}
-  } else if(fx.vip_sale){
-    const vs=fx.vip_sale;doSale(vs.price,vs.money,1.12);G.vipDeals++;
-  } else if(fx.sales_chance!==undefined){
-    const prob=fx.sales_chance+(G.skills.hustle-1)*.04-(stressPenalty?.1:0);
-    if(Math.random()<prob)doSale(G.brand.p[0]*1000,rnd(4000,9000));
-    else saleMsg='📞 Звонок — пока без результата';
-  } else if(fx.sales){
-    G.monthSales+=fx.sales;G.totalSales+=fx.sales;G.money+=fx.money||0;
-    saleMsg=`💰 +${fx.sales} продажи!`;
+  }
+  else if(fx.sale_open){
+    const so=fx.sale_open;
+    const prob=so.p+(G.skills.hustle-1)*.04-(stressHit?.1:0);
+    if(Math.random()<prob){doSale(so.price,so.money||rnd(5000,12000));}
+    else{saleMsg=Math.random()>.5?'🕐 Клиент берёт паузу — обещал перезвонить':'😔 Клиент ушёл к конкурентам';}
+  }
+  else if(fx.sales_chance){
+    const sc=fx.sales_chance;const cnt=sc.count||1;let sold=0;
+    for(let i=0;i<cnt;i++){if(Math.random()<(sc.p-(stressHit?.12:0)+(G.skills.hustle-1)*.04)){sold++;G.monthSales++;G.totalSales++;G.money+=rnd(4000,9000);}}
+    if(sold)saleMsg=`💰 ${sold} продаж по прозвону!`;else saleMsg='📞 Прозвон — пока без результата';
   }
 
-  if(saleMsg)banner(saleMsg,saleMsg.startsWith('💰')?'ok':'fail');
+  if(saleMsg){banner(saleMsg,saleMsg.startsWith('💰')?'ok':saleMsg.startsWith('📞')?'info':'fail');}
 
   gainXP(fx.xp||5);
-  updateHUD();updateCareer();checkAchs();checkBurnout();save();
+  updateHUD();updateCareerUI();checkAchs();
+  checkBurnout();save();
 
-  // Advance phase / day
+  // Advance phase
   G.dayPhase++;
-  const maxPhases=3+Math.floor(G.skills.hustle/2);
-  if(G.dayPhase>=maxPhases){
-    // End of day → new day
-    setTimeout(advanceDay,1100);
+  const dayEventsCount=2+Math.floor(G.skills.hustle/2);
+  const isMonthEnd=(G.day-1)%30===dim()-1;
+
+  if(G.dayPhase>=dayEventsCount+2){
+    // End of day
+    G._date=new Date(G._date.getTime()+86400000);G.day++;
+    const d=G._date;
+    const newDom=d.getDate();const newDim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+    if(newDom===1&&G.day>2){setTimeout(showMonthReport,1000);return;}
+    G.dayPhase=0;
+    setTimeout(pickEvent,900);
   } else {
-    setTimeout(pickEvent,1000);
+    setTimeout(pickEvent,900);
   }
 }
 
-// ════════════════════════════════════════
+function dim(){return new Date(G._date.getFullYear(),G._date.getMonth()+1,0).getDate();}
+
+// ══════════════════════════════════════════
+//  BURNOUT CHECK
+// ══════════════════════════════════════════
+function checkBurnout(){
+  if(G.burnout<95||document.getElementById('burnmo').classList.contains('on'))return;
+  const box=document.getElementById('burn-ch');box.innerHTML='';
+  [{ic:'✈️',t:'Срочный отпуск — 80 000₽',s:'-60 выгорание, -40 стресс, 5 дней',cost:80000,burn:-60,stress:-40,skip:5},
+   {ic:'🛏',t:'Больничный — 3 дня',s:'-30 выгорание, -20 стресс',burn:-30,stress:-20,skip:3,mood:20},
+  ].forEach(ch=>{
+    const btn=document.createElement('button');btn.className='chb';
+    btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div><div class="chs">${ch.s}</div></div>`;
+    btn.onclick=()=>{
+      if(ch.cost)G.money-=ch.cost;
+      if(ch.burn)G.burnout=clamp(G.burnout+ch.burn,0,100);
+      if(ch.stress)G.stress=clamp(G.stress+ch.stress,0,100);
+      if(ch.mood)G.mood=clamp(G.mood+ch.mood,0,100);
+      if(ch.skip){for(let i=0;i<ch.skip;i++){G._date=new Date(G._date.getTime()+86400000);G.day++;}}
+      addLog(`${ch.t} — выгорание снижено`);unlockAch('survived_burn');
+      closeMo('burnmo');updateHUD();updateCareerUI();pickEvent();
+    };
+    box.appendChild(btn);
+  });
+  document.getElementById('burnmo').classList.add('on');
+}
+
+// ══════════════════════════════════════════
 //  RANDOM EVENTS
-// ════════════════════════════════════════
-function showRandomEvent(ev){
+// ══════════════════════════════════════════
+function showRandEvent(ev){
   document.getElementById('evmo-body').innerHTML=`
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.7rem">
       <div style="font-size:22px">${ev.ic}</div>
-      <div><div style="font-size:13px;font-weight:700">${ev.t}</div><div style="font-size:10px;color:var(--t2)">⚡ Случайное событие</div></div>
-    </div>
-    <p>${ev.d}</p>`;
+      <div><div style="font-size:13px;font-weight:800">${ev.t}</div><div style="font-size:10px;color:var(--t2)">⚡ Случайное событие</div></div>
+    </div><p>${ev.d}</p>`;
   const box=document.getElementById('evmo-ch');box.innerHTML='';
   ev.ch.forEach(ch=>{
     const btn=document.createElement('button');btn.className='chb';
     btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div><div class="chs">${ch.s}</div></div>`;
-    btn.onclick=()=>{applyRandEvent(ch);closeMo('evmo');};
+    btn.onclick=()=>{applyRandFX(ch);closeMo('evmo');};
     box.appendChild(btn);
   });
   document.getElementById('evmo').classList.add('on');
 }
-function applyRandEvent(ch){
+
+function applyRandFX(ch){
   if(ch.cost)G.money-=ch.cost;if(ch.debt)G.debt+=ch.debt;
   if(ch.money)G.money+=ch.money;if(ch.mood)G.mood=clamp(G.mood+ch.mood,0,100);
   if(ch.stress)G.stress=clamp(G.stress+ch.stress,0,100);
   if(ch.rep)G.rep=clamp(G.rep+ch.rep,0,100);
   if(ch.csi)G.csi=clamp(G.csi+ch.csi,0,100);
-  if(ch.xp)gainXP(ch.xp);
+  if(ch.xp)gainXP(ch.xp);if(ch.col)gainCol(ch.col,12);
+  if(ch.col_lena)G.cols.lena=clamp(G.cols.lena+ch.col_lena,0,100);
+  if(ch.col_ruslan)gainColRuslan(ch.col_ruslan);
   if(ch.sales){G.monthSales+=ch.sales;G.totalSales+=ch.sales;G.money+=ch.money||0;}
-  if(ch.col)gainCol(ch.col,12);if(ch.col_lena)G.cols.lena=clamp(G.cols.lena+ch.col_lena,0,100);
-  if(ch.col_ruslan)G.cols.ruslan=clamp(G.cols.ruslan+ch.col_ruslan,0,100);
-  if(ch.skipDay){G._date=new Date(G._date.getTime()+86400000);G.day++;}
   if(ch.skip){for(let i=0;i<ch.skip;i++){G._date=new Date(G._date.getTime()+86400000);G.day++;}}
-  if(ch.skill2){gainSkill(SKILLS[rnd(0,SKILLS.length-1)].id);gainSkill(SKILLS[rnd(0,SKILLS.length-1)].id);}
+  if(ch.risky_scheme){if(Math.random()<.5){showFire();return;}}
+  if(ch.sales_chance)if(Math.random()<ch.sales_chance.p){G.monthSales++;G.totalSales++;G.money+=rnd(5000,10000);}
   if(ch.log)addLog('📌 '+ch.log);
-  updateHUD();updateCareer();checkAchs();save();
+  updateHUD();updateCareerUI();checkAchs();save();
   setTimeout(pickEvent,500);
 }
 
-// ════════════════════════════════════════
-//  LIFE TAB
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
+//  SCHEME CHECK
+// ══════════════════════════════════════════
+function triggerSchemeCheck(){
+  const sc=SCHEME_CHECKS[rnd(0,SCHEME_CHECKS.length-1)];
+  document.getElementById('scheme-ti').textContent=sc.ti;
+  document.getElementById('scheme-tx').textContent=sc.tx;
+  const box=document.getElementById('scheme-ch');box.innerHTML='';
+  sc.ch.forEach(ch=>{
+    const btn=document.createElement('button');btn.className='chb'+(ch.risky_scheme?' risky':'');
+    btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div><div class="chs">${ch.s}</div></div>`;
+    btn.onclick=()=>{
+      if(ch.rep)G.rep=clamp(G.rep+ch.rep,0,100);
+      if(ch.money)G.money+=ch.money;
+      if(ch.csi)G.csi=clamp(G.csi+ch.csi,0,100);
+      if(ch.stress)G.stress=clamp(G.stress+ch.stress,0,100);
+      if(ch.risky_scheme&&Math.random()<.55){showFire();return;}
+      if(ch.log)addLog('🚔 '+ch.log);
+      closeMo('schememo');updateHUD();updateCareerUI();save();
+    };
+    box.appendChild(btn);
+  });
+  document.getElementById('schememo').classList.add('on');
+}
+
+// ══════════════════════════════════════════
+//  HEADHUNTING
+// ══════════════════════════════════════════
+function showHeadhunt(offer){
+  document.getElementById('hh-ic').textContent=offer.ic;
+  document.getElementById('hh-ti').textContent=offer.ti;
+  document.getElementById('hh-tx').textContent=offer.tx;
+  const box=document.getElementById('hh-ch');box.innerHTML='';
+  offer.choices.forEach(ch=>{
+    const btn=document.createElement('button');btn.className='chb';
+    btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div><div class="chs">${ch.s||''}</div></div>`;
+    btn.onclick=()=>{
+      if(ch.go){G.brand=ch.go;document.getElementById('tb-br')&&(document.getElementById('tb-br').textContent=ch.go.n);
+        unlockAch('brand_jump');banner(`🚗 Переход в ${ch.go.n}! Новый старт.`,'ok');addLog(ch.log);}
+      if(ch.stay){if(ch.rep)G.rep=clamp(G.rep+ch.rep,0,100);banner('Остались в текущем салоне. +репутация за лояльность','info');addLog(ch.log);}
+      if(ch.negotiate){const ok=G.rep>70&&Math.random()<.6;if(ok){G.money+=rnd(5000,15000);banner('Повышение одобрено!','ok');}else{G.rep=clamp(G.rep-5,0,100);banner('Отказали — небольшая неловкость','warn');}addLog(ch.log);}
+      closeMo('hhmo');updateHUD();save();
+    };
+    box.appendChild(btn);
+  });
+  document.getElementById('hhmo').classList.add('on');
+}
+
+// ══════════════════════════════════════════
+//  LIFE TAB — PURCHASE + CELEBRATION
+// ══════════════════════════════════════════
 function buildLifeTab(){
   const sections=[
-    {id:'life-housing',pool:[...LIFE_ITEMS.housing,...LIFE_ITEMS.transport],label:null},
-    {id:'life-lifestyle',pool:LIFE_ITEMS.lifestyle,label:null},
-    {id:'life-relax',pool:LIFE_ITEMS.relax,label:null},
-    {id:'life-risk',pool:LIFE_ITEMS.risk,label:null},
+    {id:'life-ht',pool:[...LIFE.housing,...LIFE.transport]},
+    {id:'life-style',pool:LIFE.style},
+    {id:'life-relax',pool:LIFE.relax},
+    {id:'life-risk',pool:LIFE.risk},
   ];
   sections.forEach(sec=>{
-    const el=document.getElementById(sec.id);if(!el)return;
-    el.innerHTML='';
+    const el=document.getElementById(sec.id);if(!el)return;el.innerHTML='';
     sec.pool.forEach(item=>{
-      const owned=G.owned.includes(item.id)||G.housing===item.id||G.transport===item.id;
-      const isMonthly=G.monthly_items.includes(item.id);
-      const card=document.createElement('div');
-      card.className='life-card'+(owned?' owned':'');
-      const priceStr=item.price>0?`${fmt(item.price)}₽`:item.monthly>0?`${fmt(item.monthly)}₽/мес`:item.debt?`кредит ${fmt(item.debt)}₽`:'Бесплатно';
-      card.innerHTML=`<div class="lc-i">${item.ic}</div><div class="lc-n">${item.n}</div><div class="lc-s">${item.desc}</div><div class="lc-price">${priceStr}</div>${owned||isMonthly?`<div class="lc-own">✓ ${isMonthly?'Активно':'Куплено'}</div>`:''}`;
-      if(!owned&&!isMonthly)card.onclick=()=>buyItem(item);
-      el.appendChild(card);
+      const owned=G.owned.includes(item.id)||G.housing===item.id||G.transport===item.id||G.monthly_items.includes(item.id);
+      const c=document.createElement('div');c.className='lcard'+(owned?' owned':'');
+      const priceStr=item.p>0?`${fmt(item.p)}₽`:item.mon?`${fmt(item.mon)}₽/мес`:item.debt?`кредит ${fmt(item.debt)}₽`:'Бесплатно';
+      c.innerHTML=`<div class="lc-i">${item.ic}</div><div class="lc-n">${item.n}</div><div class="lc-s">${item.d}</div><div class="lc-p">${priceStr}</div>`;
+      if(!owned&&!item.isDefault)c.onclick=()=>buyItem(item);
+      el.appendChild(c);
     });
   });
 }
 
 function buyItem(item){
   if(item.special){handleSpecial(item);return;}
-  if(item.price&&G.money<item.price){banner(`Не хватает ${fmt(item.price-G.money)}₽`,  'fail');return;}
-  if(item.price>0)G.money-=item.price;
+  if(item.p&&G.money<item.p){banner(`Не хватает ${fmt(item.p-G.money)}₽`,'fail');return;}
+  if(item.p>0)G.money-=item.p;
   if(item.debt)G.debt+=item.debt;
-  if(item.monthly>0&&!G.monthly_items.includes(item.id))G.monthly_items.push(item.id);
+  if(item.mon>0&&!G.monthly_items.includes(item.id))G.monthly_items.push(item.id);
 
-  // Apply one-time effects
-  if(item.stressNow)G.stress=clamp(G.stress+item.stressNow,0,100);
-  if(item.moodNow||item.moodBonus)G.mood=clamp(G.mood+(item.moodNow||item.moodBonus||0),0,100);
-  if(item.energyNow||item.energy)G.energy=clamp(G.energy+(item.energyNow||item.energy||0),0,100);
-  if(item.burnNow)G.burnout=clamp(G.burnout+item.burnNow,0,100);
-  if(item.repBonus)G.rep=clamp(G.rep+item.repBonus,0,100);
-  if(item.colUp)gainCol(item.colUp,10);
-  if(item.skipDays){for(let i=0;i<item.skipDays;i++){G._date=new Date(G._date.getTime()+86400000);G.day++;}}
+  const imm=item.immediate||{};
+  if(imm.stress)G.stress=clamp(G.stress+imm.stress,0,100);
+  if(imm.mood)G.mood=clamp(G.mood+imm.mood,0,100);
+  if(imm.nrg)G.nrg=clamp(G.nrg+imm.nrg,0,100);
+  if(imm.burnout)G.burnout=clamp(G.burnout+imm.burnout,0,100);
+  if(imm.col_ruslan)gainColRuslan(imm.col_ruslan);
 
-  // Housing/transport special
-  if(LIFE_ITEMS.housing.some(x=>x.id===item.id))G.housing=item.id;
-  if(LIFE_ITEMS.transport.some(x=>x.id===item.id))G.transport=item.id;
+  const fx=item.fx||{};
+  if(fx.rep)G.rep=clamp(G.rep+fx.rep,0,100);
+  if(fx.stress)G.stress=clamp(G.stress+fx.stress,0,100);
+  if(fx.mood)G.mood=clamp(G.mood+fx.mood,0,100);
 
-  if(!item.monthly&&!LIFE_ITEMS.relax.some(x=>x.id===item.id&&(x.daily||x.weekly)))G.owned.push(item.id);
-  // Apply monthly bonuses immediately
-  if(item.stressBonus)G.stress=clamp(G.stress+item.stressBonus,0,100);
+  if(LIFE.housing.some(x=>x.id===item.id)){G.housing=item.id;}
+  if(LIFE.transport.some(x=>x.id===item.id)){G.transport=item.id;}
+  if(item.skip){for(let i=0;i<item.skip;i++){G._date=new Date(G._date.getTime()+86400000);G.day++;}}
+  if(!LIFE.relax.some(x=>x.id===item.id&&(x.daily||x.weekly||x.monthly)))G.owned.push(item.id);
 
   addLog(`Купил: ${item.n}`);
-  banner(`${item.ic} ${item.n} — ${item.price>0?`-${fmt(item.price)}₽`:item.monthly>0?`${fmt(item.monthly)}₽/мес`:'Готово'}!`,'ok');
-  updateHUD();updateCareer();save();buildLifeTab();
+  showPurchaseCelebration(item);
+  updateHUD();updateCareerUI();save();buildLifeTab();
+}
+
+function showPurchaseCelebration(item){
+  document.getElementById('purch-ic').textContent=item.ic;
+  // Personalized title
+  const titles={
+    flat1:'Вы переехали в квартиру!',flat2:'Двухкомнатная квартира — ваша!',
+    penthouse:'Пентхаус. Вершина достигнута.',
+    mercedesE:'Поздравляем! Mercedes E-класс — ваш.',
+    mercedesS:'Mercedes S-класс. Вы достигли топ-уровня.',
+    vacation:'Отпуск на море! Заряжаетесь.',
+    rolex:'Rolex на запястье. Статус.',
+    gym:'Абонемент в зал — инвестиция в себя.',
+  };
+  document.getElementById('purch-title').textContent=titles[item.id]||`${item.n} — ваше!`;
+  // Effects text
+  const effs=[];
+  if(item.immediate?.stress<0)effs.push(`${item.immediate.stress} стресс`);
+  if(item.immediate?.mood>0)effs.push(`+${item.immediate.mood} настроя`);
+  if(item.immediate?.nrg>0)effs.push(`+${item.immediate.nrg} энергии`);
+  if(item.fx?.rep>0)effs.push(`+${item.fx.rep} репутации`);
+  if(item.fx?.mood>0)effs.push(`+${item.fx.mood} настроя`);
+  document.getElementById('purch-sub').textContent=effs.length?'Эффект: '+effs.join(', '):'Приятное приобретение!';
+  document.getElementById('purch-effects').innerHTML=`<div style="font-size:13px;color:var(--t2)">${item.d}</div>`;
+  // Life level bar
+  const ll=Math.min(100,G.lifeLevel+5);
+  document.getElementById('life-lvl-f').style.width=ll+'%';
+  document.getElementById('life-lvl-txt').textContent=`Уровень ${Math.round(ll/20)}/5`;
+  document.getElementById('purchasemo').classList.add('on');
 }
 
 function handleSpecial(item){
-  const modals=[
-    {id:'tradein_scheme',txt:'Серая схема с Trade-In — берёте разницу не полностью в кассу. Быстрые деньги, но риск проверки.',
-     ch:[
-      {ic:'💸',t:'Провернуть схему',money:rnd(30000,80000),risk:0.3,rep:-20,penalty:-50000,log:'Мутный трейд-ин — взял разницу'},
-      {ic:'🙅',t:'Отказаться — слишком рискованно',log:'Отказался от серой схемы'},
-    ]},
-    {id:'crypto',txt:'Крипта: вложить 50 000₽. Шанс 40% получить ×2.5. Шанс 60% — потерять всё.',
-     ch:[
-      {ic:'₿',t:'Вложить 50 000₽',cost:50000,special_roll:{win:0.4,win_mult:2.5}},
-      {ic:'🙅',t:'Не рисковать',log:'Отказался от крипты'},
-    ]},
-    {id:'betting',txt:'Ставки: 10 000₽ на матч. Шанс 45% выиграть ×2.',
-     ch:[
-      {ic:'🎰',t:'Поставить 10 000₽',cost:10000,special_roll:{win:0.45,win_mult:2}},
-      {ic:'🙅',t:'Не играть',log:'Не стал ставить'},
-    ]},
-    {id:'flip',txt:'Купить авто за 200к, продать за 260-300к. Риск: рынок упадёт.',
-     ch:[
-      {ic:'🚗',t:'Купить авто для перепродажи',cost:200000,special_roll:{win:0.65,win_mult:1.45,win_base:200000}},
-      {ic:'🙅',t:'Слишком рискованно',log:'Отказался от перекупа'},
-    ]},
-    {id:'invest',txt:'Акции: 100 000₽ на год. +15-25% если рынок растёт.',
-     ch:[
-      {ic:'📈',t:'Инвестировать 100 000₽',cost:100000,special_roll:{win:0.7,win_add:rnd(15000,25000)}},
-      {ic:'🙅',t:'Не сейчас',log:'Отложил инвестиции'},
-    ]},
-    {id:'business',txt:'Открыть автомойку: 500к стартовых. 60% шанс пассивного дохода +30к/мес.',
-     ch:[
-      {ic:'🏢',t:'Открыть мойку — 500 000₽',cost:500000,special_roll:{win:0.6,monthly_income:30000}},
-      {ic:'🙅',t:'Слишком дорого',log:'Отложил открытие бизнеса'},
-    ]},
-  ];
-  const mo=modals.find(x=>x.id===item.id);if(!mo)return;
-  document.getElementById('evmo-body').innerHTML=`<div style="font-size:20px;text-align:center;margin-bottom:.7rem">${item.ic}</div><h2 style="margin-bottom:.5rem">${item.n}</h2><p>${mo.txt}</p>`;
+  const opts={
+    ti_scheme:{txt:'Серая схема с Trade-In: взять часть разницы мимо кассы. +50-80к, риск проверки и увольнения.',
+      ch:[{ic:'💸',t:'Провернуть схему',s:'+деньги, риск 30% проверки',money:rnd(40000,80000),risk:0.3,log:'Серый трейд-ин'},
+          {ic:'🙅',t:'Отказаться',s:'Безопасно',log:'Отказался от серой схемы'}]},
+    crypto:{txt:`Крипта: вложить 50 000₽. 40% шанс ×2.5. 60% — потеря.`,cost:50000,
+      ch:[{ic:'₿',t:'Вложить',s:'Большой риск',cost:50000,roll:{win:.4,mul:2.5}},
+          {ic:'🙅',t:'Не рисковать',s:'Безопасно',log:'Отказался от крипты'}]},
+    bet:{txt:'Ставки: 10 000₽. 45% выиграть ×2.',cost:10000,
+      ch:[{ic:'🎰',t:'Поставить 10 000₽',s:'45% выиграть',cost:10000,roll:{win:.45,mul:2}},
+          {ic:'🙅',t:'Не ставить',log:'Прошёл мимо ставок'}]},
+    flip:{txt:'Перекупить авто за 200к, продать за 260-300к.',
+      ch:[{ic:'🚗',t:'Купить для перепродажи',s:'+200к, 65% прибыль',cost:200000,roll:{win:.65,mul:1.45,base:200000}},
+          {ic:'🙅',t:'Слишком рискованно',log:'Отказался от перекупа'}]},
+    invest:{txt:'Акции: 100 000₽. +15-25% если рынок вверх.',
+      ch:[{ic:'📈',t:'Вложить 100 000₽',s:'70% шанс прибыли',cost:100000,roll:{win:.7,add:rnd(15000,25000)}},
+          {ic:'🙅',t:'Не сейчас',log:'Отложил инвестиции'}]},
+    biz:{txt:'Автомойка: 500 000₽. 60% шанс +30к/мес пассивно.',
+      ch:[{ic:'🔧',t:'Открыть мойку',s:'500к стартовых, пассивный доход',cost:500000,roll:{win:.6,monthly:30000}},
+          {ic:'🙅',t:'Слишком дорого',log:'Отложил открытие бизнеса'}]},
+  };
+  const op=opts[item.special];if(!op)return;
+  document.getElementById('evmo-body').innerHTML=`<div style="font-size:22px;text-align:center;margin-bottom:.6rem">${item.ic}</div><h2 style="margin-bottom:.5rem">${item.n}</h2><p>${op.txt}</p>`;
   const box=document.getElementById('evmo-ch');box.innerHTML='';
-  mo.ch.forEach(ch=>{
+  (op.ch||[]).forEach(ch=>{
     const btn=document.createElement('button');btn.className='chb';
-    btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div></div>`;
+    btn.innerHTML=`<div class="chi">${ch.ic}</div><div><div class="cht">${ch.t}</div><div class="chs">${ch.s||''}</div></div>`;
     btn.onclick=()=>{
       if(ch.cost){if(G.money<ch.cost){banner('Недостаточно средств','fail');closeMo('evmo');return;}G.money-=ch.cost;}
       if(ch.money)G.money+=ch.money;
-      if(ch.rep)G.rep=clamp(G.rep+ch.rep,0,100);
-      if(ch.risk&&Math.random()<ch.risk){G.money+=ch.penalty||0;G.rep=clamp(G.rep-30,0,100);banner('⚠️ Попались на проверке! Репутация разрушена','danger');}
-      if(ch.special_roll){
-        const sr=ch.special_roll;
-        if(Math.random()<sr.win){
-          const gain=sr.win_mult?(ch.cost||50000)*(sr.win_mult-1):sr.win_add||0;
-          const base=sr.win_base?sr.win_base*(sr.win_mult-1):0;
-          G.money+=gain+base;
-          if(sr.monthly_income){G.money+=sr.monthly_income;banner(`Бизнес открыт! +${fmt(sr.monthly_income)}₽ в этот месяц`,'ok');}
-          else banner(`Удача! +${fmt(gain+base)}₽`,'ok');
-        } else {banner('Не повезло — деньги потеряны','fail');}
+      if(ch.risk){G.schemeCount++;G.cleanSchemes=false;if(Math.random()<ch.risk)setTimeout(()=>triggerSchemeCheck(),1500);}
+      if(ch.roll){const r=ch.roll;
+        if(Math.random()<r.win){
+          const gain=r.mul?(ch.cost||0)*(r.mul-1)+(r.base?r.base*(r.mul-1):0):r.add||0;
+          G.money+=gain;if(r.monthly)G.money+=r.monthly;
+          banner(r.monthly?`Бизнес открыт! +${fmt(r.monthly)}₽ этот месяц`:`Удача! +${fmt(gain)}₽`,'ok');
+        } else banner('Не повезло — деньги потеряны','fail');
       }
       if(ch.log)addLog('🎲 '+ch.log);
       closeMo('evmo');updateHUD();save();buildLifeTab();
@@ -1636,34 +2009,29 @@ function handleSpecial(item){
   document.getElementById('evmo').classList.add('on');
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  TAB SWITCHING
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 function switchTab(name){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('on');
   document.getElementById('nav-'+name).classList.add('active');
   if(name==='life')buildLifeTab();
-  if(name==='career')updateCareer();
-  if(name==='stats')updateCareer();
+  if(name==='career'||name==='stats')updateCareerUI();
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════════
 //  BRAND + CHAR SETUP
-// ════════════════════════════════════════
-let _selectedBrand=null;
+// ══════════════════════════════════════════
+let _sb=null;
 (function(){
   const grid=document.getElementById('bgrid');
   BRANDS.forEach(br=>{
     const c=document.createElement('div');c.className='bc';
     c.style.setProperty('--bc',br.c);
     c.innerHTML=`<div class="bc-i">${br.ic}</div><span class="bc-n">${br.n}</span><div class="bc-s">${br.s}</div><div class="bc-r">${br.p[0].toLocaleString()}–${br.p[1].toLocaleString()} тыс.</div>`;
-    c.onclick=()=>{
-      document.querySelectorAll('.bc').forEach(x=>x.classList.remove('picked'));
-      c.classList.add('picked');_selectedBrand=br;
-      document.getElementById('btn-brand').disabled=false;
-    };
+    c.onclick=()=>{document.querySelectorAll('.bc').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');_sb=br;document.getElementById('btn-brand').disabled=false;};
     grid.appendChild(c);
   });
   const sp=document.getElementById('spick');
@@ -1677,10 +2045,10 @@ let _selectedBrand=null;
   sp.firstChild?.classList.add('sel');
 })();
 
-window.brandConfirm=function(){
-  if(!_selectedBrand)return;
-  G.brand=_selectedBrand;
-  document.getElementById('bbadge').innerHTML=`${_selectedBrand.ic} <b>${_selectedBrand.n}</b> <span style="color:var(--t2);font-size:11px">· ${_selectedBrand.s}</span>`;
+window.brandOk=function(){
+  if(!_sb)return;
+  G.brand=_sb;
+  document.getElementById('bbadge').innerHTML=`${_sb.ic} <b>${_sb.n}</b> <span style="color:var(--t2);font-size:11px">· ${_sb.s}</span>`;
   show('sc');
 };
 
@@ -1689,53 +2057,30 @@ function startGame(){
   G.name=nm;G.exp=document.getElementById('cexp').value;G.goal=document.getElementById('cgoal').value;
   if(G.exp==='new'){G.level=0;G.xp=0;}else if(G.exp==='mid'){G.level=1;G.xp=160;}else{G.level=2;G.xp=420;}
   G.skills[G.startSkill]=3;
-  G.day=1;G.month=1;G.dayPhase=0;G.phaseEvent=0;
-  G.mood=100;G.energy=100;G.stress=0;G.burnout=0;G.rep=50;G.csi=100;
-  G.money=0;G.debt=0;G.monthSales=0;G.monthSalesHistory=[];G.totalSales=0;G.totalEarned=0;G.revenue=0;G.badMonths=0;
-  G.cols={kate:50,ruslan:40,lena:60};G.housing='room';G.transport='bus';G.owned=[];G.monthly_items=[];
-  G.achievements=[];G.vipDeals=0;G.calcStreak=0;G.demotions=0;G.recentEventIds=[];G.usedEventIds=[];
-  G._date=new Date(2026,0,1);
-  show('sg');updateHUD();updateCalendar();updateCareer();pickEvent();
+  G.day=1;G.month=1;G._date=new Date(2026,0,1);G.dayPhase=0;
+  G.mood=100;G.nrg=100;G.stress=0;G.burnout=0;G.rep=50;G.csi=100;
+  G.money=0;G.debt=0;G.monthSales=0;G.totalSales=0;G.revenue=0;G.totalEarned=0;G.badMonths=0;
+  G.cols={kate:50,ruslan:40,lena:60};G.housing='room';G.transport='bus';G.owned=[];G.monthly_items=[];G.lifeLevel=0;
+  G.achievements=[];G.vipDeals=0;G.calcStreak=0;G.schemeCount=0;G.demotions=0;G.cleanSchemes=true;
+  G.recentRandIds=[];G.usedMorningIdx=[];G.worldEvents=[];G.worldEventLog=[];
+  show('sg');updateHUD();updateCalendar();updateCareerUI();pickEvent();
 }
 
-// Restore save
+// Restore
 (function(){
   try{
-    const sv=localStorage.getItem('bac6');if(!sv)return;
+    const sv=localStorage.getItem('bac7');if(!sv)return;
     const p=JSON.parse(sv);
     const brand=BRANDS.find(b=>b.id===p.brand);
     if(!brand||!p.name)return;
     if(!confirm(`Продолжить за ${p.name} (${brand.n}, ${CAREER[p.level||0].t}, День ${p.day})?`))return;
     Object.assign(G,p);G.brand=brand;G._date=new Date(p._date||'2026-01-01');
-    show('sg');updateHUD();updateCalendar();updateCareer();pickEvent();
+    show('sg');updateHUD();updateCalendar();updateCareerUI();pickEvent();
   }catch(e){}
 })();
 
 // SPLASH
-setTimeout(()=>{document.getElementById('splash').classList.add('hide');show('sb');},2200);
-
-// ENDING hook (optional, e.g. triggered from menu)
-window.showEnding=function(){
-  const sc=Math.round((G.rep*.25)+(Math.min(100,G.totalSales/Math.max(1,CAREER[G.level].plan*G.month)*100)*.3)+(G.csi*.2)+(Math.min(100,G.level/4*100)*.25));
-  let ic,ti,tx;
-  if(sc>=85){ic='👑';ti='Легенда ГК Башавтоком';tx=`${G.name} стал ${CAREER[G.level].t}. Буранов С.В. лично отметил ваши заслуги.`;}
-  else if(sc>=70){ic='🏆';ti='Лучший менеджер';tx='Отличная карьера! Исмагилов рекомендовал вас в кадровый резерв.';}
-  else if(sc>=50){ic='👍';ti='Опытный специалист';tx='Достойный путь. Есть куда расти.';}
-  else{ic='📚';ti='Трудный путь';tx='Много испытаний. Попробуйте снова с опытом.';}
-  document.getElementById('e-ic').textContent=ic;document.getElementById('e-ti').textContent=ti;
-  document.getElementById('e-sc').textContent=sc;
-  document.getElementById('e-sb').innerHTML=`балл · ${G.brand.n} · ${G.name} · ${CAREER[G.level].t}`;
-  document.getElementById('e-tx').textContent=tx;
-  document.getElementById('egrid').innerHTML=`
-    <div class="egit"><div class="egil">Продаж</div><div class="egiv" style="color:var(--red)">${G.totalSales}</div></div>
-    <div class="egit"><div class="egil">Заработано</div><div class="egiv" style="color:var(--gold)">${fmt(G.totalEarned)}₽</div></div>
-    <div class="egit"><div class="egil">CSI</div><div class="egiv" style="color:var(--pur)">${G.csi}%</div></div>
-    <div class="egit"><div class="egil">Репутация</div><div class="egiv">${G.rep}</div></div>
-    <div class="egit"><div class="egil">Должность</div><div class="egiv" style="font-size:11px">${CAREER[G.level].t}</div></div>
-    <div class="egit"><div class="egil">XP</div><div class="egiv" style="color:var(--gold)">${G.xp}</div></div>`;
-  document.getElementById('ach-end').innerHTML=G.achievements.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);return a?`<div class="achbadge">${a.ic} ${a.n}</div>`:''}).join('');
-  show('se');
-};
+setTimeout(()=>{document.getElementById('splash').classList.add('hide');setTimeout(()=>show('sb'),600);},2400);
 </script>
 </body>
 </html>
