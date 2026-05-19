@@ -1231,9 +1231,9 @@ function buildCalc(autoPrice){
     </div>`).join('');
   return `<div class="calc-wrap">
     <div class="calc-title">💳 Кредитный калькулятор</div>
-    <div class="calc-mechanic">🎮 <b>Механика:</b> чем выгоднее клиенту → выше шанс одобрения, но меньше ваш бонус. Баланс решает!</div>
+    <div class="calc-mechanic b{color:var(--gold)}">🎮 <b>Механика:</b> чем выгоднее клиенту → выше шанс одобрения, но меньше ваш бонус. Баланс решает!</div>
     <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Выберите банк:</div>${banksHTML}</div>
-    <div class="calc-row"><label>Стоимость</label><input type=range min=${Math.round(G.brand.p[0]*700)} max=${Math.round(G.brand.p[1]*1300)} value=${CALC.price} step=50000 oninput="CALC.price=+this.value;document.getElementById('cc-prv').textContent=Math.round(this.value/1000)+'тыс.₽';recalc()"><div class="calc-val" id="cc-prv">${Math.round(CALC.price/1000)}тыс.₽</div></div>
+    <div class="calc-row"><label>Стоимость</label><input type=range min=${Math.round(G.brand.p[0]*700)} max=${Math.round(G.brand.p[1]*1300)} value=${CALC.price} step=50000 oninput="CALC.price=+this.value;document.getElementById('cc-prv').textContent=Math.round(this.value/1000)+'тыс.₽';recalc();window.showCreditMentorTip&&window.showCreditMentorTip()"><div class="calc-val" id="cc-prv">${Math.round(CALC.price/1000)}тыс.₽</div></div>
     <div class="calc-row"><label>Взнос</label><input type=range min=10 max=60 value=20 step=5 oninput="CALC.down=+this.value;document.getElementById('cc-dv').textContent=this.value+'%';recalc()"><div class="calc-val" id="cc-dv">20%</div></div>
     <div class="calc-row"><label>Срок</label><input type=range min=12 max=84 value=36 step=12 oninput="CALC.term=+this.value;document.getElementById('cc-tv').textContent=this.value+' мес.';recalc()"><div class="calc-val" id="cc-tv">36 мес.</div></div>
     <div class="calc-grid">
@@ -2220,11 +2220,208 @@ function startGame(){
   }catch(e){}
 })();
 
-// Splash
+// ─── SPLASH → ONBOARDING ───
 setTimeout(()=>{
   document.getElementById('splash').classList.add('out');
-  setTimeout(()=>goTo('s-brand'),600);
+  setTimeout(()=>{
+    const seen=localStorage.getItem('ob_done');
+    goTo(seen?'s-brand':'s-onboard');
+    if(!seen)initObDots();
+  },600);
 },2500);
+
+// ─── ONBOARDING SYSTEM ───
+const OB_TOTAL=6;
+function initObDots(){
+  for(let s=0;s<OB_TOTAL;s++){
+    const el=document.getElementById('ob-dots-'+s);
+    if(!el)continue;
+    el.innerHTML=Array.from({length:OB_TOTAL},(_,i)=>`<div class="ob-dot${i<s?' done':i===s?' active':''}"></div>`).join('');
+  }
+}
+
+window.obNext=function(n){
+  document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));
+  const target=document.getElementById('ob-'+n);
+  if(target){
+    target.classList.add('active');
+    target.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+};
+
+window.finishOnboarding=function(){
+  localStorage.setItem('ob_done','1');
+  goTo('s-brand');
+};
+
+// ─── MENTOR SYSTEM ───
+const MENTOR_TIPS={
+  // keyed by context: when to show, what to say
+  first_scene:'Привет! Я Руслан — твой наставник. Читай ситуацию внимательно. Каждый выбор имеет последствия. Не торопись.',
+  high_stress:'Стресс выше 60%! Это снижает твои шансы на сделку. После смены сходи в бар или закажи доставку — вкладка «Жизнь».',
+  low_plan:'До конца месяца мало времени, а план не выполнен. Обзвони базу или возьми любой входящий лид — не пропускай ни одного.',
+  first_credit:'Кредитный калькулятор — твой главный инструмент. Высокий первый взнос + срок до 60 месяцев = выше шанс одобрения.',
+  level_up_1:'Поздравляю с повышением до Менеджера! Теперь у тебя есть своя база клиентов и лимит скидки 5%. Используй это.',
+  level_up_2:'Старший менеджер — это уже серьёзно. Лена будет просить помощи. Наставничество даёт XP и улучшает атмосферу.',
+  level_up_3:'РОП — ты теперь управляешь людьми. Загляни в вкладку «Команда» — там появились новые инструменты.',
+  level_up_4:'Директор! Маркетинговый бюджет, стратегия, ивенты. Это уже не продажи — это управление бизнесом.',
+  vip_client:'VIP-клиент в зале! Не торопись. Такие клиенты ценят внимание — VIP-зона и кофе повышают шанс закрытия.',
+  burnout_warning:'Выгорание растёт! Если достигнет 95% — придётся брать больничный или отпуск. Снижай стресс заранее.',
+  bad_month:'Месяц идёт плохо. Два плохих месяца подряд — понижение. Сосредоточься на быстрых сделках — скидка лучше отказа.',
+  no_money:'Денег мало. Не влезай в лишние кредиты. Дождись зарплаты и бонуса в конце месяца.',
+};
+
+let _mentorShown=new Set();
+let _mentorTimer=null;
+
+function showMentor(key,forceShow=false){
+  if(!key||(!forceShow&&_mentorShown.has(key)))return;
+  const text=MENTOR_TIPS[key];if(!text)return;
+  _mentorShown.add(key);
+  const tip=document.getElementById('mentor-tip');
+  const txt=document.getElementById('mentor-text');
+  if(!tip||!txt)return;
+  txt.textContent=text;
+  tip.classList.add('show');
+  clearTimeout(_mentorTimer);
+  _mentorTimer=setTimeout(()=>tip.classList.remove('show'),7000);
+}
+
+window.hideMentor=function(){
+  const tip=document.getElementById('mentor-tip');if(tip)tip.classList.remove('show');
+  clearTimeout(_mentorTimer);
+};
+
+// Called at key moments in gameplay
+function checkMentorTriggers(){
+  if(G.stress>60)showMentor('high_stress');
+  if(G.burnout>70)showMentor('burnout_warning');
+  if(G.money<5000&&G.month>1)showMentor('no_money');
+  const lvl=LEVELS[G.level];
+  const daysLeft=30-((G.day-1)%30);
+  if(daysLeft<8&&G.monthSales<lvl.planTarget*.5)showMentor('bad_month');
+}
+
+// Show mentor on first scene ever
+let _firstScene=true;
+function maybeShowFirstTip(){
+  if(_firstScene){_firstScene=false;setTimeout(()=>showMentor('first_scene',true),1200);}
+}
+
+// ─── CAREER PATH DISPLAY (used in profile tab) ───
+function renderCareerPath(){
+  const lvl=LEVELS[G.level];
+  const xpNext=G.level<LEVELS.length-1?LEVELS[G.level+1].xpNeeded:null;
+  const xpNeeded=xpNext?xpNext-G.xp:0;
+  return `
+    <div style="margin-bottom:.8rem">
+      ${LEVELS.map((l,i)=>{
+        const isDone=i<G.level,isCurr=i===G.level,isNext=i===G.level+1;
+        return `<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:.5rem;opacity:${isDone||isCurr?1:.45}">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:32px;height:32px;border-radius:50%;background:${isCurr?l.color+'22':'var(--d3)'};border:2px solid ${isDone?'var(--grn)':isCurr?l.color:'var(--b2)'};display:flex;align-items:center;justify-content:center;font-size:15px">${l.icon}</div>
+            ${i<LEVELS.length-1?`<div style="width:2px;height:20px;background:${isDone?'var(--grn)':'var(--b2)'};margin-top:2px"></div>`:''}
+          </div>
+          <div style="padding-top:4px">
+            <div style="font-size:12px;font-weight:800;color:${isCurr?l.color:'var(--tx)'}">${l.title}${isCurr?' ← сейчас':''}</div>
+            <div style="font-size:10px;color:var(--t2);margin-top:1px">${l.description}</div>
+            ${isCurr&&xpNext?`<div style="font-size:10px;color:var(--t3);margin-top:2px">До повышения: ${xpNeeded} XP</div>`:''}
+            ${isNext?`<div style="font-size:10px;color:var(--gold);margin-top:2px">🔓 Откроется: ${l.unlocks[0]}</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ─── NPC UNLOCK SYSTEM ───
+const NPC_UNLOCKS=[
+  {level:0,key:'ruslan',title:'Знакомство с наставником',msg:'Привет! Я Руслан, старший менеджер. Пока ты стажёр — я твой ориентир. Задавай вопросы, следи за подсказками.'},
+  {level:1,key:'kate',title:'Знакомство с Катей',msg:'Привет! Я Катя — кредитный специалист. Как только начнёшь оформлять кредиты, я помогу выбрать лучший банк и условия.'},
+  {level:2,key:'ismagilov',title:'Исмагилов А.М. заметил тебя',msg:'Артём, я слежу за показателями. Твой уровень вырос — буду передавать тебе корпоративных клиентов. Не подведи.'},
+  {level:3,key:'tagirovich',title:'Марат Тагирович: теперь ты РОП',msg:'Руководство командой — другая игра. Твои менеджеры, твои показатели. Успех команды — твоя ответственность.'},
+  {level:4,key:'buranow',title:'Буранов С.В.: добро пожаловать в директора',msg:'Артём. Я Буранов — директор группы. Ты прошёл большой путь. Управляй салоном как бизнесом. Жду результатов.'},
+];
+
+let _unlockedNpcs=new Set(['ruslan']);
+
+function checkNpcUnlocks(){
+  NPC_UNLOCKS.forEach(u=>{
+    if(G.level>=u.level&&!_unlockedNpcs.has(u.key)){
+      _unlockedNpcs.add(u.key);
+      showNpcUnlock(u);
+    }
+  });
+}
+
+function showNpcUnlock(u){
+  const n=NPCS_DEF[u.key];if(!n)return;
+  // show as event modal
+  document.getElementById('event-modal-body').innerHTML=`
+    <div style="text-align:center;margin-bottom:.8rem">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--d3);border:2px solid ${n.c};display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto .6rem">${n.em}</div>
+      <div style="font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Новый персонаж</div>
+      <div style="font-size:16px;font-weight:900">${n.n}</div>
+      <div style="font-size:12px;color:${n.c};margin-top:2px;font-weight:700">${u.title}</div>
+    </div>
+    ${npcHTML(u.key,u.msg)}`;
+  const box=document.getElementById('event-modal-choices');box.innerHTML=`
+    <button class="btn btn-career" onclick="closeModal('modal-event')">Понял, продолжаем →</button>`;
+  openModal('modal-event');
+}
+
+// Patch nextScene to trigger checks
+const _origNextScene=nextScene;
+// Override gainXP to check NPC unlocks
+const _origGainXP=gainXP;
+window.gainXP=function(n){
+  _origGainXP(n);
+  checkNpcUnlocks();
+  checkMentorTriggers();
+};
+
+// Patch renderWorkTab to show first tip and run checks
+const _origRenderWorkTab=renderWorkTab;
+window.renderWorkTab=function(scene){
+  _origRenderWorkTab(scene);
+  maybeShowFirstTip();
+  checkMentorTriggers();
+};
+
+// Patch renderProfileTab to show career path
+const _origRenderProfileTab=renderProfileTab;
+window.renderProfileTab=function(){
+  _origRenderProfileTab();
+  // Inject career path section into profile tab
+  const profileEl=document.getElementById('tab-profile');
+  if(!profileEl)return;
+  // Insert career path before achievements section if not already there
+  if(!document.getElementById('career-path-section')){
+    const cpDiv=document.createElement('div');
+    cpDiv.id='career-path-section';
+    cpDiv.className='profile-section';
+    cpDiv.innerHTML=`<div class="ps-title">📈 Карьерный путь</div>${renderCareerPath()}`;
+    // insert before the last section (achievements)
+    const sections=profileEl.querySelectorAll('.profile-section');
+    const last=sections[sections.length-1];
+    if(last)profileEl.insertBefore(cpDiv,last);
+    else profileEl.appendChild(cpDiv);
+  } else {
+    document.getElementById('career-path-section').innerHTML=`<div class="ps-title">📈 Карьерный путь</div>${renderCareerPath()}`;
+  }
+};
+
+// Show level-specific mentor tip on promotion
+const _origShowLevelUp=showLevelUp;
+window.showLevelUp=function(lvl){
+  _origShowLevelUp(lvl);
+  const tipKey='level_up_'+lvl.id;
+  setTimeout(()=>showMentor(tipKey,true),500);
+};
+
+// Credit mechanic tip
+window.showCreditMentorTip=function(){
+  showMentor('first_credit',true);
+};
 </script>
 </body>
 </html>
